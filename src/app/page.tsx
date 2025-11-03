@@ -2,17 +2,12 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import wwwPackage from '../../package.json';
 import ASTVisualizer from '../components/ASTVisualizer';
 import ChunkVisualizer from '../components/ChunkVisualizer';
 import Toast from '../components/Toast';
-import {
-  CharacterTextSplitter,
-  MarkdownTextSplitter,
-  RecursiveCharacterTextSplitter,
-} from '@langchain/textsplitters';
-import { chunkdown } from 'chunkdown';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
+import { splitterRegistry } from '../lib/splitters/registry';
+import type { TextSplitterConfig } from '../lib/splitters/types';
 
 const defaultText = `# AI SDK Core
 
@@ -43,34 +38,28 @@ These functions take a standardized approach to setting up [prompts](./prompts) 
 
 Please check out the [AI SDK Core API Reference](/docs/reference/ai-sdk-core) for more details on each function.`;
 
-// Version information imported from package.json files
-const CHUNKDOWN_VERSION = wwwPackage.dependencies['chunkdown'].replace('^', '');
-const LANGCHAIN_VERSION = wwwPackage.dependencies[
-  '@langchain/textsplitters'
-].replace('^', '');
-const MASTRA_VERSION = wwwPackage.dependencies['@mastra/rag'].replace('^', '');
-
 // Library and algorithm configurations
 type Library = 'chunkdown' | 'langchain' | 'mastra';
 type ChunkdownAlgorithm = 'markdown';
 type LangchainAlgorithm = 'markdown' | 'character' | 'sentence';
 type MastraAlgorithm = 'recursive' | 'character' | 'markdown';
 
+// Get library configuration from registry
 const libraryConfig = {
   chunkdown: {
     name: 'chunkdown',
-    version: CHUNKDOWN_VERSION,
-    algorithms: ['markdown'] as const,
+    version: splitterRegistry.get('chunkdown')?.version || '1.4.1',
+    algorithms: splitterRegistry.get('chunkdown')?.algorithms || (['markdown'] as const),
   },
   langchain: {
     name: '@langchain/textsplitters',
-    version: LANGCHAIN_VERSION,
-    algorithms: ['markdown', 'character', 'sentence'] as const,
+    version: splitterRegistry.get('langchain')?.version || '0.1.0',
+    algorithms: splitterRegistry.get('langchain')?.algorithms || (['markdown', 'character', 'sentence'] as const),
   },
   mastra: {
     name: '@mastra/rag',
-    version: MASTRA_VERSION,
-    algorithms: ['recursive', 'character', 'markdown'] as const,
+    version: splitterRegistry.get('mastra')?.version || '1.3.3',
+    algorithms: splitterRegistry.get('mastra')?.algorithms || (['recursive', 'character', 'markdown'] as const),
   },
 };
 
@@ -183,7 +172,7 @@ function HomeContent() {
     ) {
       setLangchainAlgorithm(langchainAlg as LangchainAlgorithm);
     }
-    
+
     const mastraAlg = params.get('mastraAlgorithm');
     if (
       mastraAlg &&
@@ -286,36 +275,24 @@ function HomeContent() {
       let resultChunks: string[] = [];
 
       try {
-        if (library === 'chunkdown') {
-          const splitter = chunkdown({
-            chunkSize,
-            maxOverflowRatio,
-          });
-          resultChunks = splitter.splitText(text);
-        } else if (library === 'mastra') {
-          // Mastra - Currently disabled due to compatibility issues
-          // TODO: Re-enable when browser compatibility is resolved
-          // const { MDocument } = await import('@mastra/rag');
-          // const doc = MDocument.fromText(text);
-          // const chunkedDoc = await doc.chunk({
-          //   strategy: mastraAlgorithm,
-          //   maxSize: chunkSize,
-          //   overlap: 0,
-          // });
-          // resultChunks = chunkedDoc.map((chunk: any) => chunk.text);
-          resultChunks = [];
-        } else {
-          // Langchain
-          let splitter;
-          if (langchainAlgorithm === 'markdown') {
-            splitter = new MarkdownTextSplitter({ chunkSize, chunkOverlap: 0 });
-          } else if (langchainAlgorithm === 'character') {
-            splitter = new CharacterTextSplitter({ chunkSize, chunkOverlap: 0, separator: '' });
-          } else {
-            splitter = new RecursiveCharacterTextSplitter({ chunkSize, chunkOverlap: 0 });
-          }
-          resultChunks = await splitter.splitText(text);
+        // Use the new splitter registry
+        const splitter = splitterRegistry.get(library);
+        if (!splitter) {
+          throw new Error(`Splitter not found: ${library}`);
         }
+
+        const algorithm = library === 'chunkdown' ? chunkdownAlgorithm :
+                        library === 'mastra' ? mastraAlgorithm :
+                        langchainAlgorithm;
+
+        const config: TextSplitterConfig = {
+          chunkSize,
+          chunkOverlap: 0,
+          algorithm,
+          maxOverflowRatio, // For chunkdown
+        };
+
+        resultChunks = await splitter.splitText(text, config);
 
         setChunks(resultChunks);
 
@@ -409,7 +386,7 @@ function HomeContent() {
     if (library === 'langchain' && langchainAlgorithm !== 'markdown') {
       params.set('langchainAlgorithm', langchainAlgorithm);
     }
-    
+
     if (library === 'mastra' && mastraAlgorithm !== 'recursive') {
       params.set('mastraAlgorithm', mastraAlgorithm);
     }
@@ -548,21 +525,6 @@ function HomeContent() {
     }
   };
 
-  // Get splitter type for ChunkVisualizer
-  const getSplitterType = ():
-    | 'markdown'
-    | 'character'
-    | 'langchain-markdown'
-    | 'mastra' => {
-    if (library === 'chunkdown') {
-      return 'markdown';
-    }
-    if (library === 'mastra') {
-      return 'mastra';
-    }
-    return 'langchain-markdown';
-  };
-
   // Move section left/right
   const moveSection = (sectionId: SectionId, direction: 'left' | 'right') => {
     const currentIndex = sectionOrder.indexOf(sectionId);
@@ -696,7 +658,7 @@ function HomeContent() {
 
               {/* GitHub Button */}
               <a
-                href="https://github.com/zirkelc/text-splitter"
+                href="https://github.com/zirkelc/chunk-visualizer"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View source code on GitHub"
@@ -719,7 +681,7 @@ function HomeContent() {
 
               {/* GitHub Icon Only (mobile) */}
               <a
-                href="https://github.com/zirkelc/text-splitter"
+                href="https://github.com/zirkelc/chunk-visualizer"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View source code on GitHub"
@@ -893,15 +855,11 @@ function HomeContent() {
                   }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
                 >
-                  <option value="chunkdown">
-                    chunkdown v{CHUNKDOWN_VERSION}
-                  </option>
-                  <option value="langchain">
-                    @langchain/textsplitters v{LANGCHAIN_VERSION}
-                  </option>
-                  <option value="mastra" disabled>
-                    @mastra/rag v{MASTRA_VERSION} (Coming Soon)
-                  </option>
+                  {splitterRegistry.getAll().map((splitter) => (
+                    <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
+                      {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1427,15 +1385,13 @@ function HomeContent() {
               <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''}>
                 <ChunkVisualizer
                   text={text}
-                  chunkSize={chunkSize}
-                  splitterType={getSplitterType()}
-                  maxOverflowRatio={maxOverflowRatio}
-                  langchainSplitterType={
-                    library === 'langchain' ? langchainAlgorithm : undefined
-                  }
-                  mastraSplitterType={
-                    library === 'mastra' ? mastraAlgorithm : undefined
-                  }
+                  splitterId={library}
+                  algorithm={getCurrentAlgorithm()}
+                  config={{
+                    chunkSize,
+                    chunkOverlap: 0,
+                    maxOverflowRatio,
+                  }}
                 />
               </div>
             )}

@@ -1,38 +1,32 @@
 'use client';
 
-import {
-  CharacterTextSplitter,
-  MarkdownTextSplitter,
-  RecursiveCharacterTextSplitter,
-  type TextSplitter,
-} from '@langchain/textsplitters';
 import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import {chunkdown} from 'chunkdown';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
+import { useTextSplitter } from '../hooks/useTextSplitter';
+import type { TextSplitterConfig } from '../lib/splitters/types';
 import Toast from './Toast';
-
-import { MDocument } from '@mastra/rag';
 
 interface ChunkVisualizerProps {
   text: string;
-  chunkSize: number;
-  splitterType?: 'markdown' | 'character' | 'langchain-markdown' | 'mastra';
-  maxOverflowRatio?: number;
-  langchainSplitterType?: 'markdown' | 'character' | 'sentence';
-  mastraSplitterType?: 'recursive' | 'character' | 'markdown';
-  experimentalTableHeaders?: boolean;
+  splitterId: string;
+  algorithm: string;
+  config: TextSplitterConfig;
 }
 
 function ChunkVisualizer({
   text,
-  chunkSize,
-  splitterType = 'markdown',
-  maxOverflowRatio = 1.5,
-  langchainSplitterType = 'markdown',
-  mastraSplitterType = 'recursive',
+  splitterId,
+  algorithm,
+  config,
 }: ChunkVisualizerProps) {
-  const [chunks, setChunks] = useState<string[]>([]);
+  // Use the new hook for text splitting
+  const { chunks } = useTextSplitter({
+    text,
+    splitterId,
+    algorithm,
+    config,
+  });
 
   // Toast state for copy feedback
   const [toast, setToast] = useState<{
@@ -47,11 +41,6 @@ function ChunkVisualizer({
     y: number;
   } | null>(null);
   const visualizationRef = useRef<HTMLDivElement>(null);
-
-
-
-  // Use the provided chunk size directly
-  const effectiveChunkSize = chunkSize;
 
   // Generate colors for chunks
   const generateColors = (count: number): string[] => {
@@ -74,83 +63,6 @@ function ChunkVisualizer({
     }
     return result;
   };
-
-  useEffect(() => {
-    const splitText = async () => {
-      if (!text.trim()) {
-        setChunks([]);
-        return;
-      }
-
-      try {
-        let newChunks: string[];
-
-        if (splitterType === 'character') {
-          // Simple character-based splitting
-          newChunks = [];
-          for (let i = 0; i < text.length; i += effectiveChunkSize) {
-            newChunks.push(text.slice(i, i + effectiveChunkSize));
-          }
-        } else if (splitterType === 'langchain-markdown') {
-          // LangChain splitters based on type
-          let splitter: TextSplitter;
-
-          if (langchainSplitterType === 'markdown') {
-            splitter = new MarkdownTextSplitter({
-              chunkSize: effectiveChunkSize,
-              chunkOverlap: 0,
-            });
-          } else if (langchainSplitterType === 'character') {
-            splitter = new CharacterTextSplitter({
-              chunkSize: effectiveChunkSize,
-              chunkOverlap: 0,
-            });
-          } else {
-            // sentence
-            splitter = new RecursiveCharacterTextSplitter({
-              chunkSize: effectiveChunkSize,
-              chunkOverlap: 0,
-              separators: ['\n\n', '\n', '. ', '! ', '? ', ' ', ''],
-            });
-          }
-
-          newChunks = await splitter.splitText(text);
-        } else if (splitterType === 'mastra') {
-          // Mastra - Currently disabled due to compatibility issues
-          // TODO: Re-enable when browser compatibility is resolved
-          // const { MDocument } = await import('@mastra/rag');
-          // const doc = MDocument.fromText(text);
-          // const chunkedDoc = await doc.chunk({
-          //   strategy: mastraSplitterType,
-          //   maxSize: effectiveChunkSize,
-          //   overlap: 0,
-          // });
-          // newChunks = chunkedDoc.map((chunk: any) => chunk.text);
-          newChunks = [];
-        } else {
-          const splitter = chunkdown({
-            chunkSize: effectiveChunkSize,
-            maxOverflowRatio: maxOverflowRatio,
-          });
-          newChunks = splitter.splitText(text);
-        }
-
-        setChunks(newChunks);
-      } catch (error) {
-        console.error('Error splitting text:', error);
-        setChunks([]);
-      }
-    };
-
-    splitText();
-  }, [
-    text,
-    effectiveChunkSize,
-    splitterType,
-    maxOverflowRatio,
-    langchainSplitterType,
-    mastraSplitterType,
-  ]);
 
   const colors = generateColors(chunks.length);
 
