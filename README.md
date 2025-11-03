@@ -2,6 +2,8 @@
 
 This project provides a playground for visual comparison of different text chunking algorithms.
 
+<img width="1512" height="857" alt="image" src="https://github.com/user-attachments/assets/d2104c98-d94a-4f8e-baa8-422228d8928e" />
+
 ## Libraries
 
 ### [chunkdown](https://github.com/zirkelc/chunkdown)
