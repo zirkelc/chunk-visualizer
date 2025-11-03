@@ -12,12 +12,15 @@ import {chunkdown} from 'chunkdown';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
 import Toast from './Toast';
 
+import { MDocument } from '@mastra/rag';
+
 interface ChunkVisualizerProps {
   text: string;
   chunkSize: number;
-  splitterType?: 'markdown' | 'character' | 'langchain-markdown';
+  splitterType?: 'markdown' | 'character' | 'langchain-markdown' | 'mastra';
   maxOverflowRatio?: number;
   langchainSplitterType?: 'markdown' | 'character' | 'sentence';
+  mastraSplitterType?: 'recursive' | 'character' | 'markdown';
   experimentalTableHeaders?: boolean;
 }
 
@@ -27,6 +30,7 @@ function ChunkVisualizer({
   splitterType = 'markdown',
   maxOverflowRatio = 1.5,
   langchainSplitterType = 'markdown',
+  mastraSplitterType = 'recursive',
 }: ChunkVisualizerProps) {
   const [chunks, setChunks] = useState<string[]>([]);
 
@@ -111,6 +115,18 @@ function ChunkVisualizer({
           }
 
           newChunks = await splitter.splitText(text);
+        } else if (splitterType === 'mastra') {
+          // Mastra - Currently disabled due to compatibility issues
+          // TODO: Re-enable when browser compatibility is resolved
+          // const { MDocument } = await import('@mastra/rag');
+          // const doc = MDocument.fromText(text);
+          // const chunkedDoc = await doc.chunk({
+          //   strategy: mastraSplitterType,
+          //   maxSize: effectiveChunkSize,
+          //   overlap: 0,
+          // });
+          // newChunks = chunkedDoc.map((chunk: any) => chunk.text);
+          newChunks = [];
         } else {
           const splitter = chunkdown({
             chunkSize: effectiveChunkSize,
@@ -133,6 +149,7 @@ function ChunkVisualizer({
     splitterType,
     maxOverflowRatio,
     langchainSplitterType,
+    mastraSplitterType,
   ]);
 
   const colors = generateColors(chunks.length);

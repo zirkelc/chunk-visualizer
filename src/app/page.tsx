@@ -48,11 +48,13 @@ const CHUNKDOWN_VERSION = wwwPackage.dependencies['chunkdown'].replace('^', '');
 const LANGCHAIN_VERSION = wwwPackage.dependencies[
   '@langchain/textsplitters'
 ].replace('^', '');
+const MASTRA_VERSION = wwwPackage.dependencies['@mastra/rag'].replace('^', '');
 
 // Library and algorithm configurations
-type Library = 'chunkdown' | 'langchain';
+type Library = 'chunkdown' | 'langchain' | 'mastra';
 type ChunkdownAlgorithm = 'markdown';
 type LangchainAlgorithm = 'markdown' | 'character' | 'sentence';
+type MastraAlgorithm = 'recursive' | 'character' | 'markdown';
 
 const libraryConfig = {
   chunkdown: {
@@ -64,6 +66,11 @@ const libraryConfig = {
     name: '@langchain/textsplitters',
     version: LANGCHAIN_VERSION,
     algorithms: ['markdown', 'character', 'sentence'] as const,
+  },
+  mastra: {
+    name: '@mastra/rag',
+    version: MASTRA_VERSION,
+    algorithms: ['recursive', 'character', 'markdown'] as const,
   },
 };
 
@@ -96,6 +103,8 @@ function HomeContent() {
     useState<ChunkdownAlgorithm>('markdown');
   const [langchainAlgorithm, setLangchainAlgorithm] =
     useState<LangchainAlgorithm>('markdown');
+  const [mastraAlgorithm, setMastraAlgorithm] =
+    useState<MastraAlgorithm>('recursive');
   const [chunkSize, setChunkSize] = useState(200);
   const [astCollapsed, setAstCollapsed] = useState(false);
   const [maxOverflowRatio, setMaxOverflowRatio] = useState(1.5);
@@ -157,7 +166,7 @@ function HomeContent() {
 
     // Load library
     const libParam = params.get('library');
-    if (libParam && (libParam === 'chunkdown' || libParam === 'langchain')) {
+    if (libParam && (libParam === 'chunkdown' || libParam === 'langchain' || libParam === 'mastra')) {
       setLibrary(libParam);
     }
 
@@ -173,6 +182,14 @@ function HomeContent() {
       ['markdown', 'character', 'sentence'].includes(langchainAlg)
     ) {
       setLangchainAlgorithm(langchainAlg as LangchainAlgorithm);
+    }
+    
+    const mastraAlg = params.get('mastraAlgorithm');
+    if (
+      mastraAlg &&
+      ['recursive', 'character', 'markdown'].includes(mastraAlg)
+    ) {
+      setMastraAlgorithm(mastraAlg as MastraAlgorithm);
     }
 
     // Load chunk size
@@ -275,6 +292,18 @@ function HomeContent() {
             maxOverflowRatio,
           });
           resultChunks = splitter.splitText(text);
+        } else if (library === 'mastra') {
+          // Mastra - Currently disabled due to compatibility issues
+          // TODO: Re-enable when browser compatibility is resolved
+          // const { MDocument } = await import('@mastra/rag');
+          // const doc = MDocument.fromText(text);
+          // const chunkedDoc = await doc.chunk({
+          //   strategy: mastraAlgorithm,
+          //   maxSize: chunkSize,
+          //   overlap: 0,
+          // });
+          // resultChunks = chunkedDoc.map((chunk: any) => chunk.text);
+          resultChunks = [];
         } else {
           // Langchain
           let splitter;
@@ -335,7 +364,7 @@ function HomeContent() {
     };
 
     splitText();
-  }, [text, library, chunkSize, maxOverflowRatio, langchainAlgorithm]);
+  }, [text, library, chunkSize, maxOverflowRatio, langchainAlgorithm, mastraAlgorithm]);
 
   // Update URL when state changes
   const updateURL = useCallback(() => {
@@ -379,6 +408,10 @@ function HomeContent() {
 
     if (library === 'langchain' && langchainAlgorithm !== 'markdown') {
       params.set('langchainAlgorithm', langchainAlgorithm);
+    }
+    
+    if (library === 'mastra' && mastraAlgorithm !== 'recursive') {
+      params.set('mastraAlgorithm', mastraAlgorithm);
     }
 
     if (chunkSize !== 200) {
@@ -436,6 +469,7 @@ function HomeContent() {
     library,
     chunkdownAlgorithm,
     langchainAlgorithm,
+    mastraAlgorithm,
     chunkSize,
     astCollapsed,
     maxOverflowRatio,
@@ -466,7 +500,9 @@ function HomeContent() {
 
   // Get current algorithm based on selected library
   const getCurrentAlgorithm = () => {
-    return library === 'chunkdown' ? chunkdownAlgorithm : langchainAlgorithm;
+    if (library === 'chunkdown') return chunkdownAlgorithm;
+    if (library === 'mastra') return mastraAlgorithm;
+    return langchainAlgorithm;
   };
 
   // Get available algorithms for current library
@@ -483,6 +519,8 @@ function HomeContent() {
   const handleAlgorithmChange = (algorithm: string) => {
     if (library === 'chunkdown') {
       setChunkdownAlgorithm(algorithm as ChunkdownAlgorithm);
+    } else if (library === 'mastra') {
+      setMastraAlgorithm(algorithm as MastraAlgorithm);
     } else {
       setLangchainAlgorithm(algorithm as LangchainAlgorithm);
     }
@@ -514,9 +552,13 @@ function HomeContent() {
   const getSplitterType = ():
     | 'markdown'
     | 'character'
-    | 'langchain-markdown' => {
+    | 'langchain-markdown'
+    | 'mastra' => {
     if (library === 'chunkdown') {
       return 'markdown';
+    }
+    if (library === 'mastra') {
+      return 'mastra';
     }
     return 'langchain-markdown';
   };
@@ -856,6 +898,9 @@ function HomeContent() {
                   </option>
                   <option value="langchain">
                     @langchain/textsplitters v{LANGCHAIN_VERSION}
+                  </option>
+                  <option value="mastra" disabled>
+                    @mastra/rag v{MASTRA_VERSION} (Coming Soon)
                   </option>
                 </select>
               </div>
@@ -1387,6 +1432,9 @@ function HomeContent() {
                   maxOverflowRatio={maxOverflowRatio}
                   langchainSplitterType={
                     library === 'langchain' ? langchainAlgorithm : undefined
+                  }
+                  mastraSplitterType={
+                    library === 'mastra' ? mastraAlgorithm : undefined
                   }
                 />
               </div>
