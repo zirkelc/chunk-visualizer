@@ -1,7 +1,7 @@
 'use client';
 
-import { splitterRegistry } from '@/lib/splitters/registry';
-import type { TextSplitterConfig } from '@/lib/splitters/types';
+import { splitterRegistry } from '../libs/splitters/registry';
+import type { TextSplitterConfig } from '../libs/splitters/types';
 
 interface SplitterConfigProps {
   splitterId: string;

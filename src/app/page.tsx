@@ -6,8 +6,8 @@ import ASTVisualizer from '../components/ASTVisualizer';
 import ChunkVisualizer from '../components/ChunkVisualizer';
 import Toast from '../components/Toast';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
-import { splitterRegistry } from '../lib/splitters/registry';
-import type { TextSplitterConfig } from '../lib/splitters/types';
+import { splitterRegistry } from '../libs/splitters/registry';
+import type { TextSplitterConfig } from '../libs/splitters/types';
 
 const defaultText = `# AI SDK Core
 

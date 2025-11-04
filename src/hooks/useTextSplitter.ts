@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { splitterRegistry } from '@/lib/splitters/registry';
-import type { TextSplitterConfig } from '@/lib/splitters/types';
+import { splitterRegistry } from '../libs/splitters/registry';
+import type { TextSplitterConfig } from '../libs/splitters/types';
 
 export interface UseTextSplitterOptions {
   text: string;
@@ -20,10 +20,10 @@ export interface UseTextSplitterResult {
 /**
  * React hook for splitting text using registered text splitters
  * Handles async splitting and loading/error states
- * 
+ *
  * @param options Splitting options
  * @returns Chunks, loading state, and error
- * 
+ *
  * @example
  * ```tsx
  * const { chunks, isLoading, error } = useTextSplitter({

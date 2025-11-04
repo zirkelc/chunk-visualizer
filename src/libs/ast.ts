@@ -3,7 +3,6 @@ import type { Heading, Node, Nodes, Root, RootContent } from 'mdast';
 /**
  * Section node type for hierarchical AST
  * Represents a heading with its associated content and nested subsections
- * Orphaned sections (heading = undefined and depth = 0) are used to wrap non-section content.
  */
 export interface Section extends Node {
   type: 'section';
@@ -14,27 +13,17 @@ export interface Section extends Node {
 
 /**
  * Hierarchical AST root that contains only sections.
- * All non-section content is wrapped in orphaned sections.
  */
 export interface HierarchicalRoot extends Node {
   type: 'root';
-  children: Section[];
+  children: Array<Section | RootContent>;
 }
-
-/**
- * Hierarchical nodes that can be either a node or a section.
- */
-export type HierarchicalNodes = Nodes | Section;
 
 /**
  * Transform a flat mdast AST into a hierarchical structure where headings
  * contain their associated content and nested subsections.
  */
 export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
-  /**
-   * Transform nodes into hierarchical sections using a simple iterative approach
-   * Groups consecutive non-section children into orphaned sections (depth 0, heading undefined)
-   */
   const transform = (nodes: RootContent[]): (RootContent | Section)[] => {
     const result: (RootContent | Section)[] = [];
     let i = 0;
@@ -43,9 +32,6 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
       const node = nodes[i];
 
       if (node.type === 'heading') {
-        /**
-         * Start a new section
-         */
         const section: Section = {
           type: 'section',
           depth: node.depth,
@@ -79,9 +65,6 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
             break;
           }
 
-          /**
-           * Add this content to the section
-           */
           section.children.push(nextNode);
           i++;
         }
@@ -116,55 +99,9 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
 
   const sections = transform(root.children);
 
-  /**
-   * Group consecutive non-section children into orphaned sections
-   */
-  const groupedSections: Section[] = [];
-  let orphanedContent: RootContent[] = [];
-
-  for (const child of sections) {
-    if (isSection(child)) {
-      /**
-       * If we have accumulated orphaned content, create an orphaned section
-       */
-      if (orphanedContent.length > 0) {
-        const orphanedSection: Section = {
-          type: 'section',
-          depth: 0,
-          heading: undefined,
-          children: orphanedContent,
-        };
-        groupedSections.push(orphanedSection);
-        orphanedContent = [];
-      }
-      /**
-       * Add the regular section
-       */
-      groupedSections.push(child);
-    } else {
-      /**
-       * Add orphaned content
-       */
-      orphanedContent.push(child);
-    }
-  }
-
-  /**
-   * Add any remaining orphaned content to the grouped sections
-   */
-  if (orphanedContent.length > 0) {
-    const orphanedSection: Section = {
-      type: 'section',
-      depth: 0,
-      heading: undefined,
-      children: orphanedContent,
-    };
-    groupedSections.push(orphanedSection);
-  }
-
   return {
     type: 'root',
-    children: groupedSections,
+    children: sections,
   };
 };
 
@@ -173,38 +110,6 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
  */
 export const isSection = (node: Node): node is Section => {
   return node?.type === 'section';
-};
-
-/**
- * Create a root node from a single node or an array of nodes.
- * If the node is already a root node, it is returned as is.
- * If the node is an array of nodes, a root node is created with the nodes as children.
- */
-export const createTree = (nodes: Nodes | Array<Nodes>): Root => {
-  if (Array.isArray(nodes)) {
-    return {
-      type: 'root',
-      children: nodes as RootContent[],
-    };
-  }
-
-  if (nodes.type === 'root') {
-    return nodes;
-  }
-
-  return createTree([nodes]);
-};
-
-/**
- * Create a section node from a partial section.
- */
-export const createSection = (section: Partial<Section>): Section => {
-  return {
-    type: 'section',
-    depth: section.depth ?? 0,
-    heading: section.heading,
-    children: section.children ?? [],
-  };
 };
 
 /**

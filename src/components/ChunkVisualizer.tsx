@@ -4,7 +4,7 @@ import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
 import { useTextSplitter } from '../hooks/useTextSplitter';
-import type { TextSplitterConfig } from '../lib/splitters/types';
+import type { TextSplitterConfig } from '../libs/splitters/types';
 import Toast from './Toast';
 
 interface ChunkVisualizerProps {
