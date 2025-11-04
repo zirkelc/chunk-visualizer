@@ -23,26 +23,26 @@ interface TreeNodeProps {
 }
 
 const nodeColors: Record<string, string> = {
-  root: 'text-gray-700',
-  heading: 'text-blue-600',
-  paragraph: 'text-green-600',
-  text: 'text-gray-600',
-  code: 'text-purple-600',
-  inlineCode: 'text-purple-500',
-  list: 'text-orange-600',
-  listItem: 'text-orange-500',
-  blockquote: 'text-indigo-600',
-  thematicBreak: 'text-red-500',
-  emphasis: 'text-pink-600',
-  strong: 'text-pink-700',
-  link: 'text-cyan-600',
-  image: 'text-teal-600',
-  html: 'text-yellow-600',
-  break: 'text-gray-400',
-  table: 'text-emerald-600',
-  tableRow: 'text-emerald-500',
-  tableCell: 'text-emerald-400',
-  delete: 'text-red-600',
+  root: 'text-gray-700 dark:text-gray-300',
+  heading: 'text-blue-600 dark:text-blue-400',
+  paragraph: 'text-green-600 dark:text-green-400',
+  text: 'text-gray-600 dark:text-gray-400',
+  code: 'text-purple-600 dark:text-purple-400',
+  inlineCode: 'text-purple-500 dark:text-purple-400',
+  list: 'text-orange-600 dark:text-orange-400',
+  listItem: 'text-orange-500 dark:text-orange-400',
+  blockquote: 'text-indigo-600 dark:text-indigo-400',
+  thematicBreak: 'text-red-500 dark:text-red-400',
+  emphasis: 'text-pink-600 dark:text-pink-400',
+  strong: 'text-pink-700 dark:text-pink-400',
+  link: 'text-cyan-600 dark:text-cyan-400',
+  image: 'text-teal-600 dark:text-teal-400',
+  html: 'text-yellow-600 dark:text-yellow-400',
+  break: 'text-gray-400 dark:text-gray-500',
+  table: 'text-emerald-600 dark:text-emerald-400',
+  tableRow: 'text-emerald-500 dark:text-emerald-400',
+  tableCell: 'text-emerald-400 dark:text-emerald-400',
+  delete: 'text-red-600 dark:text-red-400',
 };
 
 function TreeNode({
@@ -142,8 +142,8 @@ function TreeNode({
   };
 
   const colorClass = isSection(node)
-    ? 'text-purple-700'
-    : nodeColors[node.type] || 'text-slate-600';
+    ? 'text-purple-700 dark:text-purple-400'
+    : nodeColors[node.type] || 'text-slate-600 dark:text-slate-300';
 
   return (
     <div className="select-none">
