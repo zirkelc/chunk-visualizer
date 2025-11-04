@@ -1272,38 +1272,7 @@ function HomeContent() {
                 </span>
               </div>
             ) : (
-              <div className={`relative ${layoutMode === 'column' ? 'flex-1 min-h-0' : 'h-[400px]'}`}>
-                {/* Collapse/Expand Button for tree content */}
-                <button
-                  onClick={() => setAstCollapsed(!astCollapsed)}
-                  type="button"
-                  title={astCollapsed ? 'Expand tree' : 'Collapse tree'}
-                  className="absolute top-2 right-6 p-1.5 bg-white/70 dark:bg-gray-700/70 border border-gray-300/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-200 rounded hover:bg-white dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-all z-10 shadow-sm"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    {astCollapsed ? (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4v16m8-8H4"
-                      />
-                    ) : (
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M20 12H4"
-                      />
-                    )}
-                  </svg>
-                </button>
+              <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : 'h-[400px]'}>
                 <ASTVisualizer text={text} collapseAll={astCollapsed} />
               </div>
             )}
