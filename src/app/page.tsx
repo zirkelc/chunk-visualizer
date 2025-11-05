@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import ASTVisualizer from '../components/ASTVisualizer';
 import ChunkVisualizer from '../components/ChunkVisualizer';
+import { ParentBox } from '../components/ParentBox';
 import Toast from '../components/Toast';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
 import { splitterRegistry } from '../libs/splitters/registry';
@@ -102,14 +103,17 @@ function HomeContent() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // Section collapse states
-  const [libraryCollapsed, setLibraryCollapsed] = useState(false);
   const [inputCollapsed, setInputCollapsed] = useState(false);
   const [astSectionCollapsed, setAstSectionCollapsed] = useState(false);
   const [chunksCollapsed, setChunksCollapsed] = useState(false);
 
+  // Toggleable section visibility states
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [libraryOptionsVisible, setLibraryOptionsVisible] = useState(true);
+
   // Section order state
-  type SectionId = 'library' | 'input' | 'ast' | 'chunks';
-  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['library', 'input', 'ast', 'chunks']);
+  type SectionId = 'input' | 'ast' | 'chunks';
+  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['input', 'ast', 'chunks']);
 
   // Chunks and statistics state
   const [chunks, setChunks] = useState<string[]>([]);
@@ -195,18 +199,20 @@ function HomeContent() {
     setAstCollapsed(collapsed === 'true');
 
     // Load section collapse states
-    setLibraryCollapsed(params.get('libraryCollapsed') === 'true');
     setInputCollapsed(params.get('inputCollapsed') === 'true');
     setAstSectionCollapsed(params.get('astSectionCollapsed') === 'true');
     setChunksCollapsed(params.get('chunksCollapsed') === 'true');
+
+    // Load toggleable section visibility states
+    setStatsVisible(params.get('statsVisible') === 'true');
+    setLibraryOptionsVisible(params.get('libraryOptionsVisible') !== 'false'); // Default true
 
     // Load section order
     const orderParam = params.get('sectionOrder');
     if (orderParam) {
       const order = orderParam.split(',') as SectionId[];
       // Validate order contains all sections
-      if (order.length === 4 &&
-          order.includes('library') &&
+      if (order.length === 3 &&
           order.includes('input') &&
           order.includes('ast') &&
           order.includes('chunks')) {
@@ -400,13 +406,16 @@ function HomeContent() {
     }
 
     // Store section collapse states
-    if (libraryCollapsed) params.set('libraryCollapsed', 'true');
     if (inputCollapsed) params.set('inputCollapsed', 'true');
     if (astSectionCollapsed) params.set('astSectionCollapsed', 'true');
     if (chunksCollapsed) params.set('chunksCollapsed', 'true');
 
+    // Store toggleable section visibility states
+    if (statsVisible) params.set('statsVisible', 'true');
+    if (!libraryOptionsVisible) params.set('libraryOptionsVisible', 'false'); // Only store if false (default is true)
+
     // Store section order if different from default
-    const defaultOrder = 'library,input,ast,chunks';
+    const defaultOrder = 'input,ast,chunks';
     const currentOrder = sectionOrder.join(',');
     if (currentOrder !== defaultOrder) {
       params.set('sectionOrder', currentOrder);
@@ -452,10 +461,11 @@ function HomeContent() {
     maxOverflowRatio,
     layoutMode,
     theme,
-    libraryCollapsed,
     inputCollapsed,
     astSectionCollapsed,
     chunksCollapsed,
+    statsVisible,
+    libraryOptionsVisible,
     sectionOrder,
     isInitialized,
     router,
@@ -763,210 +773,51 @@ function HomeContent() {
 
         {/* Main Content - Toggle between Column and Row Layout */}
         <div className={layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0' : 'flex flex-col gap-4 flex-1 overflow-y-auto'}>
-          {/* Library - First Column/Row */}
-          <div className={`${layoutMode === 'column' ? (libraryCollapsed ? 'flex flex-col min-h-0 w-12 flex-shrink-0' : 'flex flex-col min-h-0 flex-1') : 'w-full flex-shrink-0'} ${
-            libraryCollapsed && layoutMode === 'row' ? 'h-12' : ''
-          }`} style={{ order: getSectionOrder('library') }}>
-            {!libraryCollapsed && (
-              <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-bold text-black dark:text-white">
-                    Library
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => moveSection('library', 'left')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move left' : 'Move up'}
-                      disabled={!canMove('library', 'left')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        )}
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => moveSection('library', 'right')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move right' : 'Move down'}
-                      disabled={!canMove('library', 'right')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        )}
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setLibraryCollapsed(!libraryCollapsed)}
-                  type="button"
-                  title={libraryCollapsed ? 'Expand' : 'Collapse'}
-                  className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {libraryCollapsed ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    )}
+          {/* Input */}
+          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('input') }}>
+            <ParentBox
+              label="Input"
+              layoutMode={layoutMode}
+              collapsed={inputCollapsed}
+              onToggleCollapse={() => setInputCollapsed(!inputCollapsed)}
+              onMoveLeft={() => moveSection('input', 'left')}
+              onMoveRight={() => moveSection('input', 'right')}
+              canMoveLeft={canMove('input', 'left')}
+              canMoveRight={canMove('input', 'right')}
+              toggleableLabel="Stats"
+              toggleableButtonContent={
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                </button>
-              </div>
-            )}
-            {libraryCollapsed ? (
-              <div
-                className={`bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg flex cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
-                  layoutMode === 'column' ? 'h-full items-start justify-center pt-4' : 'h-12 items-center justify-center'
-                }`}
-                onClick={() => setLibraryCollapsed(false)}
-              >
-                <span className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${
-                  layoutMode === 'column' ? 'writing-mode-vertical transform -rotate-180' : ''
-                }`} style={layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}}>
-                  Library
+                  {stats.inputCharacters} chars
                 </span>
-              </div>
-            ) : (
-              <div className={`bg-white dark:bg-gray-800 p-4 border border-gray-300 dark:border-gray-700 rounded-lg overflow-y-auto ${
-                layoutMode === 'column' ? 'flex-1 min-h-0' : 'h-auto'
-              }`}>
-              {/* Library Picker */}
-              <div className="mb-4">
-                <label
-                  htmlFor="library-picker"
-                  className="block text-sm font-medium mb-1 text-black dark:text-white"
-                >
-                  Library
-                </label>
-                <select
-                  id="library-picker"
-                  value={library}
-                  onChange={(e) =>
-                    handleLibraryChange(e.target.value as Library)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                >
-                  {splitterRegistry.getAll().map((splitter) => (
-                    <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
-                      {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Algorithm Picker */}
-              <div className="mb-4">
-                <label
-                  htmlFor="algorithm-picker"
-                  className="block text-sm font-medium mb-1 text-black dark:text-white"
-                >
-                  Algorithm
-                </label>
-                <select
-                  id="algorithm-picker"
-                  value={getCurrentAlgorithm()}
-                  onChange={(e) => handleAlgorithmChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                >
-                  {getAvailableAlgorithms().map((alg) => (
-                    <option key={alg} value={alg}>
-                      {alg.charAt(0).toUpperCase() + alg.slice(1)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Chunk Size Control */}
-              <div className="mb-4">
-                <label
-                  htmlFor="chunk-size"
-                  className="block text-sm font-medium mb-1 text-black dark:text-white"
-                >
-                  Chunk Size: {chunkSize}
-                </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    id="chunk-size"
-                    type="range"
-                    min="1"
-                    max="2000"
-                    value={chunkSize}
-                    onChange={(e) => setChunkSize(Number(e.target.value))}
-                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  />
-                  <input
-                    type="number"
-                    min="1"
-                    max="2000"
-                    value={chunkSize}
-                    onChange={(e) => setChunkSize(Number(e.target.value))}
-                    className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span>1</span>
-                  <span>2000</span>
-                </div>
-              </div>
-
-              {/* Chunkdown-specific: Max Overflow Ratio */}
-              {library === 'chunkdown' && (
-                <div className="mb-4">
-                  <label
-                    htmlFor="max-overflow"
-                    className="block text-sm font-medium mb-1 text-black dark:text-white"
-                  >
-                    Max Overflow: {maxOverflowRatio}
-                  </label>
-                  <div className="flex items-center gap-2 mb-2">
-                    <input
-                      id="max-overflow"
-                      type="range"
-                      min="1.0"
-                      max="3.0"
-                      step="0.1"
-                      value={maxOverflowRatio}
-                      onChange={(e) =>
-                        setMaxOverflowRatio(Number(e.target.value))
-                      }
-                      className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                    />
-                    <input
-                      type="number"
-                      min="1.0"
-                      max="3.0"
-                      step="0.1"
-                      value={maxOverflowRatio}
-                      onChange={(e) =>
-                        setMaxOverflowRatio(Number(e.target.value))
-                      }
-                      className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                    />
+              }
+              toggleableVisible={statsVisible}
+              onToggleVisible={() => setStatsVisible(!statsVisible)}
+              toggleableSection={
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <label className="text-sm font-medium text-black dark:text-white">
+                        Stats
+                      </label>
+                    </div>
+                    <button
+                      onClick={() => setStatsVisible(false)}
+                      type="button"
+                      title="Hide Stats"
+                      className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                    <span>1.0</span>
-                    <span>3.0</span>
-                  </div>
-                </div>
-                )}
-
-                {/* Separator */}
-                <div className="border-t border-gray-300 dark:border-gray-600 my-4"></div>
-
-                {/* Statistics */}
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-black dark:text-white">
-                    Statistics
-                  </label>
+                  <div className="p-4">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     {/* Input Length */}
                     <div>
@@ -1104,266 +955,217 @@ function HomeContent() {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-          </div>
-          {/* Input */}
-          <div className={`${layoutMode === 'column' ? (inputCollapsed ? 'flex flex-col min-h-0 w-12 flex-shrink-0' : 'flex flex-col min-h-0 flex-1') : 'w-full flex-shrink-0'} ${
-            inputCollapsed && layoutMode === 'row' ? 'h-12' : ''
-          }`} style={{ order: getSectionOrder('input') }}>
-            {!inputCollapsed && (
-              <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="text-input"
-                    className="text-sm font-bold text-black dark:text-white"
-                  >
-                    Input
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => moveSection('input', 'left')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move left' : 'Move up'}
-                      disabled={!canMove('input', 'left')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        )}
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => moveSection('input', 'right')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move right' : 'Move down'}
-                      disabled={!canMove('input', 'right')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        )}
-                      </svg>
-                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => setInputCollapsed(!inputCollapsed)}
-                  type="button"
-                  title={inputCollapsed ? 'Expand' : 'Collapse'}
-                  className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {inputCollapsed ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    )}
-                  </svg>
-                </button>
-              </div>
-            )}
-            {inputCollapsed ? (
-              <div
-                className={`bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg flex cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
-                  layoutMode === 'column' ? 'h-full items-start justify-center pt-4' : 'h-12 items-center justify-center'
-                }`}
-                onClick={() => setInputCollapsed(false)}
-              >
-                <span className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${
-                  layoutMode === 'column' ? 'writing-mode-vertical transform -rotate-180' : ''
-                }`} style={layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}}>
-                  Input
-                </span>
-              </div>
-            ) : (
+              }
+            >
               <textarea
                 id="text-input"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className={`w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800 ${
-                  layoutMode === 'column' ? 'flex-1 min-h-0' : 'h-[400px]'
-                }`}
+                className={`w-full h-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800`}
                 placeholder="Enter your text here..."
               />
-            )}
+            </ParentBox>
           </div>
 
           {/* AST Visualization */}
-          <div className={`${layoutMode === 'column' ? (astSectionCollapsed ? 'flex flex-col min-h-0 w-12 flex-shrink-0' : 'flex flex-col min-h-0 flex-1') : 'w-full flex-shrink-0'} ${
-            astSectionCollapsed && layoutMode === 'row' ? 'h-12' : ''
-          }`} style={{ order: getSectionOrder('ast') }}>
-            {!astSectionCollapsed && (
-              <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="ast-view-mode"
-                    className="text-sm font-bold text-black dark:text-white"
-                  >
-                    Markdown AST
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => moveSection('ast', 'left')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move left' : 'Move up'}
-                      disabled={!canMove('ast', 'left')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        )}
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => moveSection('ast', 'right')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move right' : 'Move down'}
-                      disabled={!canMove('ast', 'right')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        )}
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setAstSectionCollapsed(!astSectionCollapsed)}
-                  type="button"
-                  title={astSectionCollapsed ? 'Expand' : 'Collapse'}
-                  className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {astSectionCollapsed ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    )}
-                  </svg>
-                </button>
-              </div>
-            )}
-            {astSectionCollapsed ? (
-              <div
-                className={`bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg flex cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
-                  layoutMode === 'column' ? 'h-full items-start justify-center pt-4' : 'h-12 items-center justify-center'
-                }`}
-                onClick={() => setAstSectionCollapsed(false)}
-              >
-                <span className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${
-                  layoutMode === 'column' ? 'writing-mode-vertical transform -rotate-180' : ''
-                }`} style={layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}}>
-                  Markdown AST
-                </span>
-              </div>
-            ) : (
-              <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : 'h-[400px]'}>
-                <ASTVisualizer text={text} collapseAll={astCollapsed} />
-              </div>
-            )}
+          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('ast') }}>
+            <ParentBox
+              label="Markdown AST"
+              layoutMode={layoutMode}
+              collapsed={astSectionCollapsed}
+              onToggleCollapse={() => setAstSectionCollapsed(!astSectionCollapsed)}
+              onMoveLeft={() => moveSection('ast', 'left')}
+              onMoveRight={() => moveSection('ast', 'right')}
+              canMoveLeft={canMove('ast', 'left')}
+              canMoveRight={canMove('ast', 'right')}
+            >
+              <ASTVisualizer text={text} collapseAll={astCollapsed} />
+            </ParentBox>
           </div>
 
           {/* Chunks */}
-          <div className={`${layoutMode === 'column' ? (chunksCollapsed ? 'flex flex-col min-h-0 w-12 flex-shrink-0' : 'flex flex-col min-h-0 flex-1') : 'w-full flex-shrink-0'} ${
-            chunksCollapsed && layoutMode === 'row' ? 'h-12' : ''
-          }`} style={{ order: getSectionOrder('chunks') }}>
-            {!chunksCollapsed && (
-              <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-bold text-black dark:text-white">
-                    Chunks
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => moveSection('chunks', 'left')}
-                      type="button"
-                      title={layoutMode === 'column' ? 'Move left' : 'Move up'}
-                      disabled={!canMove('chunks', 'left')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                        )}
+          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('chunks') }}>
+            <ParentBox
+              label="Chunks"
+              layoutMode={layoutMode}
+              collapsed={chunksCollapsed}
+              onToggleCollapse={() => setChunksCollapsed(!chunksCollapsed)}
+              onMoveLeft={() => moveSection('chunks', 'left')}
+              onMoveRight={() => moveSection('chunks', 'right')}
+              canMoveLeft={canMove('chunks', 'left')}
+              canMoveRight={canMove('chunks', 'right')}
+              toggleableLabel="Library"
+              toggleableButtonContent={
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {libraryConfig[library].name}
+                </span>
+              }
+              toggleableVisible={libraryOptionsVisible}
+              onToggleVisible={() => setLibraryOptionsVisible(!libraryOptionsVisible)}
+              toggleableSection={
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                    </button>
+                      <label className="text-sm font-medium text-black dark:text-white">
+                        Library
+                      </label>
+                    </div>
                     <button
-                      onClick={() => moveSection('chunks', 'right')}
+                      onClick={() => setLibraryOptionsVisible(false)}
                       type="button"
-                      title={layoutMode === 'column' ? 'Move right' : 'Move down'}
-                      disabled={!canMove('chunks', 'right')}
-                      className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Hide Library"
+                      className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {layoutMode === 'column' ? (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        ) : (
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        )}
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                       </svg>
                     </button>
                   </div>
+                  <div className="p-4 space-y-4">
+                  {/* Library Picker */}
+                  <div>
+                    <label
+                      htmlFor="library-picker"
+                      className="block text-sm font-medium mb-1 text-black dark:text-white"
+                    >
+                      Library
+                    </label>
+                    <select
+                      id="library-picker"
+                      value={library}
+                      onChange={(e) =>
+                        handleLibraryChange(e.target.value as Library)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
+                    >
+                      {splitterRegistry.getAll().map((splitter) => (
+                        <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
+                          {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Algorithm Picker */}
+                  <div>
+                    <label
+                      htmlFor="algorithm-picker"
+                      className="block text-sm font-medium mb-1 text-black dark:text-white"
+                    >
+                      Algorithm
+                    </label>
+                    <select
+                      id="algorithm-picker"
+                      value={getCurrentAlgorithm()}
+                      onChange={(e) => handleAlgorithmChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
+                    >
+                      {getAvailableAlgorithms().map((alg) => (
+                        <option key={alg} value={alg}>
+                          {alg.charAt(0).toUpperCase() + alg.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Chunk Size Control */}
+                  <div>
+                    <label
+                      htmlFor="chunk-size"
+                      className="block text-sm font-medium mb-1 text-black dark:text-white"
+                    >
+                      Chunk Size: {chunkSize}
+                    </label>
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        id="chunk-size"
+                        type="range"
+                        min="1"
+                        max="2000"
+                        value={chunkSize}
+                        onChange={(e) => setChunkSize(Number(e.target.value))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                      <input
+                        type="number"
+                        min="1"
+                        max="2000"
+                        value={chunkSize}
+                        onChange={(e) => setChunkSize(Number(e.target.value))}
+                        className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span>1</span>
+                      <span>2000</span>
+                    </div>
+                  </div>
+
+                  {/* Chunkdown-specific: Max Overflow Ratio */}
+                  {library === 'chunkdown' && (
+                    <div>
+                      <label
+                        htmlFor="max-overflow"
+                        className="block text-sm font-medium mb-1 text-black dark:text-white"
+                      >
+                        Max Overflow: {maxOverflowRatio}
+                      </label>
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          id="max-overflow"
+                          type="range"
+                          min="1.0"
+                          max="3.0"
+                          step="0.1"
+                          value={maxOverflowRatio}
+                          onChange={(e) =>
+                            setMaxOverflowRatio(Number(e.target.value))
+                          }
+                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                        />
+                        <input
+                          type="number"
+                          min="1.0"
+                          max="3.0"
+                          step="0.1"
+                          value={maxOverflowRatio}
+                          onChange={(e) =>
+                            setMaxOverflowRatio(Number(e.target.value))
+                          }
+                          className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                        />
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>1.0</span>
+                        <span>3.0</span>
+                      </div>
+                    </div>
+                  )}
+                  </div>
                 </div>
-                <button
-                  onClick={() => setChunksCollapsed(!chunksCollapsed)}
-                  type="button"
-                  title={chunksCollapsed ? 'Expand' : 'Collapse'}
-                  className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    {chunksCollapsed ? (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    ) : (
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    )}
-                  </svg>
-                </button>
-              </div>
-            )}
-            {chunksCollapsed ? (
-              <div
-                className={`bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg flex cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
-                  layoutMode === 'column' ? 'h-full items-start justify-center pt-4' : 'h-12 items-center justify-center'
-                }`}
-                onClick={() => setChunksCollapsed(false)}
-              >
-                <span className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${
-                  layoutMode === 'column' ? 'writing-mode-vertical transform -rotate-180' : ''
-                }`} style={layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}}>
-                  Chunks
-                </span>
-              </div>
-            ) : (
-              <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''}>
-                <ChunkVisualizer
-                  text={text}
-                  splitterId={library}
-                  algorithm={getCurrentAlgorithm()}
-                  config={{
-                    chunkSize,
-                    chunkOverlap: 0,
-                    maxOverflowRatio,
-                  }}
-                />
-              </div>
-            )}
+              }
+            >
+              <ChunkVisualizer
+                text={text}
+                splitterId={library}
+                algorithm={getCurrentAlgorithm()}
+                config={{
+                  chunkSize,
+                  chunkOverlap: 0,
+                  maxOverflowRatio,
+                }}
+              />
+            </ParentBox>
           </div>
         </div>
 
