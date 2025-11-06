@@ -99,7 +99,7 @@ function HomeContent() {
   const [astCollapsed, setAstCollapsed] = useState(false);
   const [maxOverflowRatio, setMaxOverflowRatio] = useState(1.5);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [layoutMode, setLayoutMode] = useState<'column' | 'row'>('row');
+  const [layoutMode, setLayoutMode] = useState<'column' | 'row'>('column');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // Section collapse states
@@ -232,14 +232,13 @@ function HomeContent() {
       setLayoutMode(layout);
     }
 
-    // Load theme or initialize from system preference
+    // Load theme or initialize to light
     const themeParam = params.get('theme');
     if (themeParam === 'light' || themeParam === 'dark') {
       setTheme(themeParam);
     } else {
-      // Initialize from system preference
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(isDark ? 'dark' : 'light');
+      // Default to light theme
+      setTheme('light');
     }
 
     setIsInitialized(true);
@@ -421,14 +420,12 @@ function HomeContent() {
       params.set('maxOverflow', maxOverflowRatio.toString());
     }
 
-    if (layoutMode !== 'row') {
+    if (layoutMode !== 'column') {
       params.set('layout', layoutMode);
     }
 
-    // Don't save theme to URL if it matches system default
-    const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const systemTheme = systemIsDark ? 'dark' : 'light';
-    if (theme !== systemTheme) {
+    // Don't save theme to URL if it's the default (light)
+    if (theme !== 'light') {
       params.set('theme', theme);
     }
 
@@ -770,7 +767,7 @@ function HomeContent() {
         <div className={layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0' : 'flex flex-col gap-4'}>
           {/* Input */}
           <div 
-            className={layoutMode === 'column' && !inputCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !inputCollapsed ? 'max-h-[600px] overflow-hidden' : ''} 
+            className={layoutMode === 'column' && !inputCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !inputCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
             style={{ order: getSectionOrder('input') }}
           >
             <ParentBox
@@ -967,7 +964,7 @@ function HomeContent() {
 
           {/* Chunks */}
           <div 
-            className={layoutMode === 'column' && !chunksCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[600px] overflow-hidden' : ''} 
+            className={layoutMode === 'column' && !chunksCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
             style={{ order: getSectionOrder('chunks') }}
           >
             <ParentBox
