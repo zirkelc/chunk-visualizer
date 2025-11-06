@@ -225,12 +225,3 @@ export class ExampleSplitter implements TextSplitter {
   }
 }
 ```
-
-## Questions?
-
-If you have questions or need help, please:
-- Open an issue on GitHub
-- Check existing splitter implementations for reference
-- Review the TypeScript interfaces for detailed type information
-
-Happy contributing! 🎉

@@ -43,7 +43,7 @@ export function ParentBox({
       className={`${
         layoutMode === 'column'
           ? collapsed
-            ? 'flex flex-col min-h-0 w-12 flex-shrink-0'
+            ? 'flex flex-col h-full w-12 flex-shrink-0'
             : 'flex flex-col min-h-0 flex-1 h-full'
           : 'w-full flex-shrink-0'
       } ${collapsed && layoutMode === 'row' ? 'h-12' : ''}`}
@@ -71,7 +71,7 @@ export function ParentBox({
 
       {/* Expanded state - show parent box with content */}
       {!collapsed && (
-        <div className="flex flex-col h-full min-h-0 bg-gray-100 dark:bg-gray-850 p-3 rounded-lg gap-3 border border-gray-300 dark:border-gray-600">
+        <div className={`flex flex-col ${layoutMode === 'column' ? 'h-full' : 'max-h-full'} min-h-0 bg-gray-100 dark:bg-gray-850 p-3 rounded-lg gap-3 border border-gray-300 dark:border-gray-600`}>
           {/* Top bar with label and controls */}
           <div className="flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">

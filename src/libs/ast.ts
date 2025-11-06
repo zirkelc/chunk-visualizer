@@ -47,6 +47,7 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
         /**
          * Collect all content until we hit a heading of same or higher level or a thematic break
          */
+        const startPos = i; // Track where children start
         while (i < nodes.length) {
           const nextNode = nodes[i];
 
@@ -77,6 +78,19 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
           (child): child is RootContent => !isSection(child),
         );
         section.children = transform(contentNodes);
+
+        /**
+         * Calculate position for section (from heading start to last child end)
+         */
+        if (node.position) {
+          const lastChild = section.children[section.children.length - 1];
+          const endPos = lastChild?.position?.end || node.position.end;
+          
+          section.position = {
+            start: node.position.start,
+            end: endPos,
+          };
+        }
 
         result.push(section);
       } else if (node.type === 'thematicBreak') {

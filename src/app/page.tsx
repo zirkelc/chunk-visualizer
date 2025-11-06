@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
-import ASTVisualizer from '../components/ASTVisualizer';
 import ChunkVisualizer from '../components/ChunkVisualizer';
+import InputWithAST from '../components/InputWithAST';
 import { ParentBox } from '../components/ParentBox';
 import Toast from '../components/Toast';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
@@ -104,7 +104,6 @@ function HomeContent() {
 
   // Section collapse states
   const [inputCollapsed, setInputCollapsed] = useState(false);
-  const [astSectionCollapsed, setAstSectionCollapsed] = useState(false);
   const [chunksCollapsed, setChunksCollapsed] = useState(false);
 
   // Toggleable section visibility states
@@ -112,8 +111,8 @@ function HomeContent() {
   const [libraryOptionsVisible, setLibraryOptionsVisible] = useState(true);
 
   // Section order state
-  type SectionId = 'input' | 'ast' | 'chunks';
-  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['input', 'ast', 'chunks']);
+  type SectionId = 'input' | 'chunks';
+  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['input', 'chunks']);
 
   // Chunks and statistics state
   const [chunks, setChunks] = useState<string[]>([]);
@@ -200,7 +199,6 @@ function HomeContent() {
 
     // Load section collapse states
     setInputCollapsed(params.get('inputCollapsed') === 'true');
-    setAstSectionCollapsed(params.get('astSectionCollapsed') === 'true');
     setChunksCollapsed(params.get('chunksCollapsed') === 'true');
 
     // Load toggleable section visibility states
@@ -212,9 +210,8 @@ function HomeContent() {
     if (orderParam) {
       const order = orderParam.split(',') as SectionId[];
       // Validate order contains all sections
-      if (order.length === 3 &&
+      if (order.length === 2 &&
           order.includes('input') &&
-          order.includes('ast') &&
           order.includes('chunks')) {
         setSectionOrder(order);
       }
@@ -407,7 +404,6 @@ function HomeContent() {
 
     // Store section collapse states
     if (inputCollapsed) params.set('inputCollapsed', 'true');
-    if (astSectionCollapsed) params.set('astSectionCollapsed', 'true');
     if (chunksCollapsed) params.set('chunksCollapsed', 'true');
 
     // Store toggleable section visibility states
@@ -415,7 +411,7 @@ function HomeContent() {
     if (!libraryOptionsVisible) params.set('libraryOptionsVisible', 'false'); // Only store if false (default is true)
 
     // Store section order if different from default
-    const defaultOrder = 'input,ast,chunks';
+    const defaultOrder = 'input,chunks';
     const currentOrder = sectionOrder.join(',');
     if (currentOrder !== defaultOrder) {
       params.set('sectionOrder', currentOrder);
@@ -462,7 +458,6 @@ function HomeContent() {
     layoutMode,
     theme,
     inputCollapsed,
-    astSectionCollapsed,
     chunksCollapsed,
     statsVisible,
     libraryOptionsVisible,
@@ -578,8 +573,8 @@ function HomeContent() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 py-4 font-mono flex flex-col overflow-hidden">
-      <div className="max-w-[2400px] mx-auto px-4 w-full flex flex-col h-full">
+    <div className={`bg-gray-50 dark:bg-gray-900 py-4 font-mono flex flex-col ${layoutMode === 'column' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
+      <div className={`max-w-[2400px] mx-auto px-4 w-full flex flex-col ${layoutMode === 'column' ? 'h-full' : ''}`}>
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
           {/* Buttons Row - Always on top on small screens */}
@@ -772,9 +767,12 @@ function HomeContent() {
         </div>
 
         {/* Main Content - Toggle between Column and Row Layout */}
-        <div className={layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0' : 'flex flex-col gap-4 flex-1 overflow-y-auto'}>
+        <div className={layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0' : 'flex flex-col gap-4'}>
           {/* Input */}
-          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('input') }}>
+          <div 
+            className={layoutMode === 'column' && !inputCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !inputCollapsed ? 'max-h-[600px] overflow-hidden' : ''} 
+            style={{ order: getSectionOrder('input') }}
+          >
             <ParentBox
               label="Input"
               layoutMode={layoutMode}
@@ -959,34 +957,19 @@ function HomeContent() {
                 </div>
               }
             >
-              <textarea
-                id="text-input"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                className={`w-full h-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800`}
-                placeholder="Enter your text here..."
+              <InputWithAST 
+                text={text}
+                onTextChange={setText}
+                collapseAll={astCollapsed}
               />
             </ParentBox>
           </div>
 
-          {/* AST Visualization */}
-          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('ast') }}>
-            <ParentBox
-              label="Markdown AST"
-              layoutMode={layoutMode}
-              collapsed={astSectionCollapsed}
-              onToggleCollapse={() => setAstSectionCollapsed(!astSectionCollapsed)}
-              onMoveLeft={() => moveSection('ast', 'left')}
-              onMoveRight={() => moveSection('ast', 'right')}
-              canMoveLeft={canMove('ast', 'left')}
-              canMoveRight={canMove('ast', 'right')}
-            >
-              <ASTVisualizer text={text} collapseAll={astCollapsed} />
-            </ParentBox>
-          </div>
-
           {/* Chunks */}
-          <div className={layoutMode === 'column' ? 'flex-1 min-h-0' : ''} style={{ order: getSectionOrder('chunks') }}>
+          <div 
+            className={layoutMode === 'column' && !chunksCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[600px] overflow-hidden' : ''} 
+            style={{ order: getSectionOrder('chunks') }}
+          >
             <ParentBox
               label="Chunks"
               layoutMode={layoutMode}

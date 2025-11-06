@@ -24,8 +24,8 @@ importers:
         specifier: ^5.0.86
         version: 5.0.86(zod@4.1.12)
       chunkdown:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^2.1.0
+        version: 2.1.0
       mdast-util-from-markdown:
         specifier: ^2.0.2
         version: 2.0.2
@@ -1312,8 +1312,8 @@ packages:
   character-entities@2.0.2:
     resolution: {integrity: sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ==}
 
-  chunkdown@2.0.0:
-    resolution: {integrity: sha512-EeLY8rV2c2II2kWw6I0fcDqglhrb8ZX4QBoKYB7adMEA4b4xDQUxk4he3J4AxHxuh/kfsmjrrm5dnIAj2PFAVw==}
+  chunkdown@2.1.0:
+    resolution: {integrity: sha512-toSCuMXH9mwY3TR0PcCcQj6P/jq//WQqP0MKoHZCuT6xQ5RpylKWm2YfIbmvENPx7y29L9kLpx0xd2nCH82lRQ==}
 
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
@@ -1722,8 +1722,8 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
-  langsmith@0.3.77:
-    resolution: {integrity: sha512-wbS/9IX/hOAsOEOtPj8kCS8H0tFHaelwQ97gTONRtIfoPPLd9MMUmhk0KQB5DdsGAI5abg966+f0dZ/B+YRRzg==}
+  langsmith@0.3.78:
+    resolution: {integrity: sha512-PVrog/DiTsiyOQ38GeZEIVadgk55/dfE3axagQksT3dt6KhFuRxhNaZrC0rp3dNW9RQJCm/c3tn+PiybwQNY0Q==}
     peerDependencies:
       '@opentelemetry/api': '*'
       '@opentelemetry/exporter-trace-otlp-proto': '*'
@@ -2738,7 +2738,7 @@ snapshots:
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.21
-      langsmith: 0.3.77(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
+      langsmith: 0.3.78(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))
       mustache: 4.2.0
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -3951,7 +3951,7 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chunkdown@2.0.0:
+  chunkdown@2.1.0:
     dependencies:
       mdast-util-from-markdown: 2.0.2
       mdast-util-gfm: 3.1.0
@@ -3959,6 +3959,7 @@ snapshots:
       mdast-util-to-markdown: 2.1.2
       mdast-util-to-string: 4.0.0
       micromark-extension-gfm: 3.0.0
+      unist-util-visit: 5.0.0
     transitivePeerDependencies:
       - supports-color
 
@@ -4327,7 +4328,7 @@ snapshots:
       chalk: 5.6.2
       diff-match-patch: 1.0.5
 
-  langsmith@0.3.77(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0)):
+  langsmith@0.3.78(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0)):
     dependencies:
       '@types/uuid': 10.0.0
       chalk: 4.1.2
