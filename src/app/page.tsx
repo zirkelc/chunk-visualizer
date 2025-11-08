@@ -764,10 +764,14 @@ function HomeContent() {
         </div>
 
         {/* Main Content - Toggle between Column and Row Layout */}
-        <div className={layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0' : 'flex flex-col gap-4'}>
+        <div className={layoutMode === 'column' ? 
+          (inputCollapsed || chunksCollapsed ? 'flex gap-4 flex-1 min-h-0' : 'grid grid-cols-2 gap-4 flex-1 min-h-0') 
+          : 'flex flex-col gap-4'}>
           {/* Input */}
           <div 
-            className={layoutMode === 'column' && !inputCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !inputCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
+            className={layoutMode === 'column' && !inputCollapsed ? 
+              (chunksCollapsed ? 'flex-1 min-h-0' : 'min-h-0') 
+              : layoutMode === 'row' && !inputCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
             style={{ order: getSectionOrder('input') }}
           >
             <ParentBox
@@ -964,7 +968,9 @@ function HomeContent() {
 
           {/* Chunks */}
           <div 
-            className={layoutMode === 'column' && !chunksCollapsed ? 'flex-1 min-h-0' : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
+            className={layoutMode === 'column' && !chunksCollapsed ? 
+              (inputCollapsed ? 'flex-1 min-h-0' : 'min-h-0')
+              : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[400px] overflow-auto' : ''} 
             style={{ order: getSectionOrder('chunks') }}
           >
             <ParentBox

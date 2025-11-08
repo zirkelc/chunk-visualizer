@@ -92,11 +92,7 @@ function TreeNode({
     if (isSection(node)) {
       const headingText =
         node.heading?.children?.map(extractTextFromNode).join('') || '';
-      const truncated =
-        headingText.length > 40
-          ? `${headingText.substring(0, 40)}...`
-          : headingText;
-      return `Section: "${truncated}" (h${node.depth})`;
+      return `Section: "${headingText}" (h${node.depth})`;
     }
 
     let label = node.type;
@@ -109,19 +105,20 @@ function TreeNode({
       label += node.ordered ? ' (ordered)' : ' (unordered)';
     } else if (node.type === 'text' && 'value' in node) {
       const text = node.value;
-      const truncated = text.length > 50 ? `${text.substring(0, 50)}...` : text;
-      label += `: "${truncated.replace(/\n/g, '\\n')}"`;
+      label += `: "${text.replace(/\n/g, '\\n')}"`;
     } else if (node.type === 'inlineCode' && 'value' in node) {
       label += `: \`${node.value}\``;
     } else if (node.type === 'link' && 'url' in node) {
-      label += `: ${node.url}`;
+      const url = node.url;
+      label += `: ${url}`;
       if ('title' in node && node.title) {
         label += ` "${node.title}"`;
       }
     } else if (node.type === 'linkReference' && 'identifier' in node) {
       label += `: [${node.identifier}]`;
     } else if (node.type === 'image' && 'url' in node) {
-      label += `: ${node.url}`;
+      const url = node.url;
+      label += `: ${url}`;
       if ('alt' in node && node.alt) {
         label += ` alt="${node.alt}"`;
       }
@@ -134,7 +131,8 @@ function TreeNode({
       if ('identifier' in node) {
         label += `: [${node.identifier}]`;
       }
-      label += `: ${node.url}`;
+      const url = node.url;
+      label += `: ${url}`;
       if ('title' in node && node.title) {
         label += ` "${node.title}"`;
       }
@@ -155,11 +153,10 @@ function TreeNode({
     } else {
       if ('value' in node && typeof node.value === 'string') {
         const text = node.value;
-        const truncated =
-          text.length > 30 ? `${text.substring(0, 30)}...` : text;
-        label += `: "${truncated}"`;
+        label += `: "${text}"`;
       } else if ('url' in node && typeof node.url === 'string') {
-        label += `: ${node.url}`;
+        const url = node.url;
+        label += `: ${url}`;
         // Add title if present
         if ('title' in node && typeof node.title === 'string' && node.title) {
           label += ` "${node.title}"`;
@@ -249,8 +246,8 @@ function TreeNode({
         </div>
 
         {/* Node content */}
-        <div className="flex-1 min-w-0">
-          <span className={`text-sm ${isSelected ? 'font-semibold' : 'font-normal'} ${colorClass}`}>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <span className={`text-sm ${isSelected ? 'font-semibold' : 'font-normal'} ${colorClass} block overflow-hidden text-ellipsis whitespace-nowrap`}>
             {getNodeLabel()}
           </span>
         </div>
@@ -475,17 +472,17 @@ export default function InputWithAST({
 
   // Always show split view with text and AST
   return (
-    <div className="flex gap-2 h-full max-h-full min-h-0 overflow-hidden">
+    <div className="grid grid-cols-2 gap-2 w-full h-full max-h-full min-h-0 overflow-hidden">
       {/* Text display with highlighting on the left - wrapper with height constraint */}
-      <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+      <div className="min-w-0 min-h-0 flex flex-col overflow-hidden">
         {hasSelection || hoveredPosition ? (
           // Show read-only highlighted view when hovering/selecting
           <div 
-            className="flex-1 min-h-0 p-3 border border-blue-400 dark:border-blue-600 rounded-lg overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white whitespace-pre-wrap cursor-pointer"
+            className="flex-1 min-h-0 min-w-0 p-3 border border-blue-400 dark:border-blue-600 rounded-lg overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white cursor-pointer"
             onClick={hasSelection ? handleClearSelection : undefined}
             title={hasSelection ? "Click to clear selection and edit" : undefined}
             style={{ 
-              wordWrap: 'break-word',
+              wordBreak: 'break-all',
               overflowWrap: 'break-word',
               whiteSpace: 'pre-wrap'
             }}
@@ -498,18 +495,19 @@ export default function InputWithAST({
             id="text-input"
             value={text}
             onChange={(e) => onTextChange(e.target.value)}
-            className="flex-1 min-h-0 p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800 whitespace-pre-wrap"
+            className="flex-1 min-h-0 min-w-0 p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800"
             placeholder="Enter your text here..."
             style={{
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word'
+              wordBreak: 'break-all',
+              overflowWrap: 'break-word',
+              whiteSpace: 'pre-wrap'
             }}
           />
         )}
       </div>
 
       {/* AST tree on the right - wrapper with height constraint */}
-      <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+      <div className="min-w-0 min-h-0 flex flex-col overflow-hidden">
         <div className="flex-1 min-h-0 overflow-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm relative">
           {error ? (
             <div className="text-red-600 dark:text-red-400 text-sm">
