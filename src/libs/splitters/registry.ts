@@ -11,10 +11,6 @@ class SplitterRegistry {
   private splitters: Map<string, TextSplitter> = new Map();
 
   constructor() {
-    // Register all available splitters
-    this.register(new ChunkdownSplitter());
-    this.register(new LangchainSplitter());
-    this.register(new MastraSplitter());
   }
 
   /**
@@ -65,3 +61,7 @@ class SplitterRegistry {
  * Import and use this instance throughout the application
  */
 export const splitterRegistry = new SplitterRegistry();
+// Register all available splitters
+splitterRegistry.register(new ChunkdownSplitter());
+splitterRegistry.register(new LangchainSplitter());
+splitterRegistry.register(new MastraSplitter());

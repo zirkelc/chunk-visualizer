@@ -45,25 +45,6 @@ type ChunkdownAlgorithm = 'markdown';
 type LangchainAlgorithm = 'markdown' | 'character' | 'sentence';
 type MastraAlgorithm = 'recursive' | 'character' | 'markdown';
 
-// Get library configuration from registry
-const libraryConfig = {
-  chunkdown: {
-    name: 'chunkdown',
-    version: splitterRegistry.get('chunkdown')?.version || '1.4.1',
-    algorithms: splitterRegistry.get('chunkdown')?.algorithms || (['markdown'] as const),
-  },
-  langchain: {
-    name: '@langchain/textsplitters',
-    version: splitterRegistry.get('langchain')?.version || '0.1.0',
-    algorithms: splitterRegistry.get('langchain')?.algorithms || (['markdown', 'character', 'sentence'] as const),
-  },
-  mastra: {
-    name: '@mastra/rag',
-    version: splitterRegistry.get('mastra')?.version || '1.3.3',
-    algorithms: splitterRegistry.get('mastra')?.algorithms || (['recursive', 'character', 'markdown'] as const),
-  },
-};
-
 // Helper functions for URL state
 const encodeText = (text: string) => {
   try {
@@ -486,7 +467,8 @@ function HomeContent() {
 
   // Get available algorithms for current library
   const getAvailableAlgorithms = () => {
-    return libraryConfig[library].algorithms;
+    const splitter = splitterRegistry.get(library);
+    return splitter?.algorithms || [];
   };
 
   // Handle library change
@@ -992,7 +974,7 @@ function HomeContent() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  {libraryConfig[library].name}
+                  {splitterRegistry.get(library)?.name || library}
                 </span>
               }
               toggleableVisible={libraryOptionsVisible}
@@ -1059,7 +1041,7 @@ function HomeContent() {
                       onChange={(e) => handleAlgorithmChange(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
                     >
-                      {getAvailableAlgorithms().map((alg) => (
+                      {getAvailableAlgorithms().map((alg: string) => (
                         <option key={alg} value={alg}>
                           {alg.charAt(0).toUpperCase() + alg.slice(1)}
                         </option>
