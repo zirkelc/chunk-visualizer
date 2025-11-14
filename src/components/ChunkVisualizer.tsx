@@ -147,11 +147,11 @@ function ChunkVisualizer({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       {/* Chunk Visualization */}
       <div
         ref={visualizationRef}
-        className="border border-gray-300 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 flex-1 relative overflow-y-auto"
+        className="border border-gray-300 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 flex-1 overflow-y-auto relative"
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
       >

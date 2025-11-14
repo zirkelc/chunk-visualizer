@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 
-interface ParentBoxProps {
+interface ContainerProps {
   label: string;
   layoutMode: 'column' | 'row';
   collapsed: boolean;
@@ -20,7 +20,7 @@ interface ParentBoxProps {
   onToggleVisible?: () => void;
 }
 
-export function ParentBox({
+export function Container({
   label,
   layoutMode,
   collapsed,
@@ -35,7 +35,7 @@ export function ParentBox({
   toggleableButtonContent,
   toggleableVisible = false,
   onToggleVisible,
-}: ParentBoxProps) {
+}: ContainerProps) {
   const hasToggleable = toggleableSection && onToggleVisible;
 
   return (
@@ -44,9 +44,11 @@ export function ParentBox({
         layoutMode === 'column'
           ? collapsed
             ? 'flex flex-col h-full w-12 flex-shrink-0'
-            : 'flex flex-col min-h-0 flex-1 h-full'
-          : 'w-full flex-shrink-0'
-      } ${collapsed && layoutMode === 'row' ? 'h-12' : ''}`}
+            : 'flex flex-col h-full overflow-hidden'
+          : collapsed
+            ? 'h-12 w-full flex-shrink-0'
+            : 'h-full w-full overflow-hidden flex flex-col'
+      }`}
     >
       {/* Collapsed state - show vertical/horizontal label */}
       {collapsed && (
@@ -71,14 +73,14 @@ export function ParentBox({
 
       {/* Expanded state - show parent box with content */}
       {!collapsed && (
-        <div className={`flex flex-col ${layoutMode === 'column' ? 'h-full' : 'max-h-full'} min-h-0 bg-gray-100 dark:bg-gray-850 p-3 rounded-lg gap-3 border border-gray-300 dark:border-gray-600`}>
+        <div className="flex flex-col h-full overflow-hidden bg-gray-100 dark:bg-gray-850 p-3 rounded-lg gap-3 border border-gray-300 dark:border-gray-600">
           {/* Top bar with label and controls */}
           <div className="flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <label className="text-sm font-bold text-black dark:text-white">
                 {label}
               </label>
-              
+
               {/* Toggle button for optional section - moved to left side */}
               {hasToggleable && (
                 <button
@@ -145,14 +147,16 @@ export function ParentBox({
 
           {/* Toggleable section (if present and visible) */}
           {hasToggleable && toggleableVisible && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 max-h-[40%] overflow-y-auto">
               {toggleableSection}
             </div>
           )}
 
           {/* Main content */}
-          <div className="flex-1 min-h-0 flex flex-col">
-            {children}
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="h-full overflow-auto">
+              {children}
+            </div>
           </div>
         </div>
       )}

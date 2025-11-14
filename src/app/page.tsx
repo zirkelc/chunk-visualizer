@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import ChunkVisualizer from '../components/ChunkVisualizer';
 import InputWithAST from '../components/InputWithAST';
-import { ParentBox } from '../components/ParentBox';
+import { Container } from '../components/Container';
 import Toast from '../components/Toast';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
 import { splitterRegistry } from '../libs/splitters/registry';
@@ -552,8 +552,8 @@ function HomeContent() {
   };
 
   return (
-    <div className={`bg-gray-50 dark:bg-gray-900 py-4 font-mono flex flex-col ${layoutMode === 'column' ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
-      <div className={`max-w-[2400px] mx-auto px-4 w-full flex flex-col ${layoutMode === 'column' ? 'h-full' : ''}`}>
+    <div className="bg-gray-50 dark:bg-gray-900 font-mono flex flex-col h-screen overflow-hidden">
+      <div className="max-w-[2400px] mx-auto px-4 py-4 w-full flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
           {/* Buttons Row - Always on top on small screens */}
@@ -750,16 +750,17 @@ function HomeContent() {
 
         {/* Main Content - Toggle between Column and Row Layout */}
         <div className={layoutMode === 'column' ?
-          (inputCollapsed || chunksCollapsed ? 'flex gap-4 flex-1 min-h-0' : 'grid grid-cols-2 gap-4 flex-1 min-h-0')
-          : 'flex flex-col gap-4'}>
+          (inputCollapsed || chunksCollapsed ? 'flex gap-4 flex-1 min-h-0 overflow-hidden' : 'grid grid-cols-2 gap-4 flex-1 min-h-0 overflow-hidden')
+          : 'flex-1 min-h-0 overflow-hidden'}>
+          <div className={layoutMode === 'row' ? 'flex flex-col gap-4 h-full overflow-y-auto' : 'contents'}>
           {/* Input */}
           <div
             className={layoutMode === 'column' && !inputCollapsed ?
-              (chunksCollapsed ? 'flex-1 min-h-0' : 'min-h-0')
-              : layoutMode === 'row' && !inputCollapsed ? 'max-h-[400px] overflow-auto' : ''}
+              (chunksCollapsed ? 'flex-1 min-h-0 overflow-hidden' : 'min-h-0 overflow-hidden')
+              : layoutMode === 'row' && !inputCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
             style={{ order: getSectionOrder('input') }}
           >
-            <ParentBox
+            <Container
               label="Input"
               layoutMode={layoutMode}
               collapsed={inputCollapsed}
@@ -948,17 +949,17 @@ function HomeContent() {
                 onTextChange={setText}
                 collapseAll={astCollapsed}
               />
-            </ParentBox>
+            </Container>
           </div>
 
           {/* Chunks */}
           <div
             className={layoutMode === 'column' && !chunksCollapsed ?
-              (inputCollapsed ? 'flex-1 min-h-0' : 'min-h-0')
-              : layoutMode === 'row' && !chunksCollapsed ? 'max-h-[400px] overflow-auto' : ''}
+              (inputCollapsed ? 'flex-1 min-h-0 overflow-hidden' : 'min-h-0 overflow-hidden')
+              : layoutMode === 'row' && !chunksCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
             style={{ order: getSectionOrder('chunks') }}
           >
-            <ParentBox
+            <Container
               label="Chunks"
               layoutMode={layoutMode}
               collapsed={chunksCollapsed}
@@ -1136,7 +1137,8 @@ function HomeContent() {
                   maxOverflowRatio,
                 }}
               />
-            </ParentBox>
+            </Container>
+          </div>
           </div>
         </div>
 

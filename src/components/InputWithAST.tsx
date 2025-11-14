@@ -472,13 +472,13 @@ export default function InputWithAST({
 
   // Always show split view with text and AST
   return (
-    <div className="grid grid-cols-2 gap-2 w-full h-full max-h-full min-h-0 overflow-hidden">
+    <div className="flex gap-2 w-full h-full overflow-hidden">
       {/* Text display with highlighting on the left - wrapper with height constraint */}
-      <div className="min-w-0 min-h-0 flex flex-col overflow-hidden">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {hasSelection || hoveredPosition ? (
           // Show read-only highlighted view when hovering/selecting
           <div 
-            className="flex-1 min-h-0 min-w-0 p-3 border border-blue-400 dark:border-blue-600 rounded-lg overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white cursor-pointer"
+            className="flex-1 p-3 border border-blue-400 dark:border-blue-600 rounded-lg overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white cursor-pointer"
             onClick={hasSelection ? handleClearSelection : undefined}
             title={hasSelection ? "Click to clear selection and edit" : undefined}
             style={{ 
@@ -495,7 +495,7 @@ export default function InputWithAST({
             id="text-input"
             value={text}
             onChange={(e) => onTextChange(e.target.value)}
-            className="flex-1 min-h-0 min-w-0 p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800"
+            className="flex-1 p-3 border border-gray-300 dark:border-gray-700 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm text-black dark:text-white bg-white dark:bg-gray-800"
             placeholder="Enter your text here..."
             style={{
               wordBreak: 'break-all',
@@ -507,8 +507,8 @@ export default function InputWithAST({
       </div>
 
       {/* AST tree on the right - wrapper with height constraint */}
-      <div className="min-w-0 min-h-0 flex flex-col overflow-hidden">
-        <div className="flex-1 min-h-0 overflow-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm relative">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-auto bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 text-sm relative">
           {error ? (
             <div className="text-red-600 dark:text-red-400 text-sm">
               Error parsing markdown: {error}
