@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import ChunkVisualizer from '../components/ChunkVisualizer';
+import { ChunkVisualizerWithOptions } from '../components/ChunkVisualizerWithOptions';
 import InputWithAST from '../components/InputWithAST';
 import { Container } from '../components/Container';
 import Toast from '../components/Toast';
@@ -861,180 +862,6 @@ function HomeContent() {
               onMoveRight={() => moveSection('input', 'right')}
               canMoveLeft={canMove('input', 'left')}
               canMoveRight={canMove('input', 'right')}
-              toggleableLabel="Stats"
-              toggleableButtonContent={
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  {stats.inputCharacters} chars
-                </span>
-              }
-              toggleableVisible={statsVisible}
-              onToggleVisible={() => setStatsVisible(!statsVisible)}
-              toggleableSection={
-                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
-                  <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <label className="text-sm font-medium text-black dark:text-white">
-                        Stats
-                      </label>
-                    </div>
-                    <button
-                      onClick={() => setStatsVisible(false)}
-                      type="button"
-                      title="Hide Stats"
-                      className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="p-4">
-                  <div className="grid grid-cols-3 gap-4 text-center">
-                    {/* Input Length */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'Original text length with markdown formatting, number in parentheses is content size without formatting',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Input
-                        </div>
-                        <div className="font-bold text-black dark:text-white">
-                          {stats.inputCharacters}{' '}
-                          <span className="text-gray-500 dark:text-gray-400">
-                            ({stats.inputContentLength})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Output Length */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'Combined length of all chunks with markdown formatting, number in parentheses is content size without formatting',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Output
-                        </div>
-                        <div className="font-bold text-black dark:text-white">
-                          {stats.outputCharacters}{' '}
-                          <span className="text-gray-500 dark:text-gray-400">
-                            ({stats.outputContentLength})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Number of Chunks */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'How many chunks the text was split into',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Chunks
-                        </div>
-                        <div className="font-bold text-black dark:text-white text-lg">
-                          {stats.numberOfChunks}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Min Size */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'Smallest chunk length with markdown formatting, number in parentheses is content size without formatting',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Min Size
-                        </div>
-                        <div className="font-bold text-black dark:text-white">
-                          {stats.minChunkSize}{' '}
-                          <span className="text-gray-500 dark:text-gray-400">
-                            ({stats.minContentSize})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Max Size */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'Largest chunk length with markdown formatting, number in parentheses is content size without formatting',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Max Size
-                        </div>
-                        <div className="font-bold text-black dark:text-white">
-                          {stats.maxChunkSize}{' '}
-                          <span className="text-gray-500 dark:text-gray-400">
-                            ({stats.maxContentSize})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Avg Size */}
-                    <div>
-                      <div className="mb-2">
-                        <div
-                          className="text-xs text-black dark:text-white underline decoration-dotted decoration-gray-400 dark:decoration-gray-500 cursor-help mb-1"
-                          onMouseEnter={(e) =>
-                            handleTooltipMouseEnter(
-                              e,
-                              'Average chunk length with markdown formatting, number in parentheses is content size without formatting',
-                            )
-                          }
-                          onMouseLeave={handleTooltipMouseLeave}
-                        >
-                          Avg Size
-                        </div>
-                        <div className="font-bold text-black dark:text-white">
-                          {stats.avgChunkSize}{' '}
-                          <span className="text-gray-500 dark:text-gray-400">
-                            ({stats.avgContentSize})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  </div>
-                </div>
-              }
             >
               <InputWithAST
                 text={text}
@@ -1052,7 +879,7 @@ function HomeContent() {
             style={{ order: getSectionOrder('chunks') }}
           >
             <Container
-              label="Chunks"
+              label="Chunks #1"
               layoutMode={layoutMode}
               collapsed={chunksCollapsed}
               onToggleCollapse={() => setChunksCollapsed(!chunksCollapsed)}
@@ -1060,18 +887,6 @@ function HomeContent() {
               onMoveRight={() => moveSection('chunks', 'right')}
               canMoveLeft={canMove('chunks', 'left')}
               canMoveRight={canMove('chunks', 'right')}
-              toggleableLabel="Library"
-              toggleableButtonContent={
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {splitterRegistry.get(library)?.name || library}
-                </span>
-              }
-              toggleableVisible={libraryOptionsVisible}
-              onToggleVisible={() => setLibraryOptionsVisible(!libraryOptionsVisible)}
               additionalActionButton={
                 <button
                   onClick={addComparisonPanel}
@@ -1085,154 +900,8 @@ function HomeContent() {
                   Compare
                 </button>
               }
-              toggleableSection={
-                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
-                  <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <label className="text-sm font-medium text-black dark:text-white">
-                        Library
-                      </label>
-                    </div>
-                    <button
-                      onClick={() => setLibraryOptionsVisible(false)}
-                      type="button"
-                      title="Hide Library"
-                      className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="p-4 space-y-4">
-                  {/* Library Picker */}
-                  <div>
-                    <label
-                      htmlFor="library-picker"
-                      className="block text-sm font-medium mb-1 text-black dark:text-white"
-                    >
-                      Library
-                    </label>
-                    <select
-                      id="library-picker"
-                      value={library}
-                      onChange={(e) =>
-                        handleLibraryChange(e.target.value as Library)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                    >
-                      {splitterRegistry.getAll().map((splitter) => (
-                        <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
-                          {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Algorithm Picker */}
-                  <div>
-                    <label
-                      htmlFor="algorithm-picker"
-                      className="block text-sm font-medium mb-1 text-black dark:text-white"
-                    >
-                      Algorithm
-                    </label>
-                    <select
-                      id="algorithm-picker"
-                      value={getCurrentAlgorithm()}
-                      onChange={(e) => handleAlgorithmChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                    >
-                      {getAvailableAlgorithms().map((alg: string) => (
-                        <option key={alg} value={alg}>
-                          {alg.charAt(0).toUpperCase() + alg.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Chunk Size Control */}
-                  <div>
-                    <label
-                      htmlFor="chunk-size"
-                      className="block text-sm font-medium mb-1 text-black dark:text-white"
-                    >
-                      Chunk Size: {chunkSize}
-                    </label>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        id="chunk-size"
-                        type="range"
-                        min="1"
-                        max="2000"
-                        value={chunkSize}
-                        onChange={(e) => setChunkSize(Number(e.target.value))}
-                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <input
-                        type="number"
-                        min="1"
-                        max="2000"
-                        value={chunkSize}
-                        onChange={(e) => setChunkSize(Number(e.target.value))}
-                        className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>1</span>
-                      <span>2000</span>
-                    </div>
-                  </div>
-
-                  {/* Chunkdown-specific: Max Overflow Ratio */}
-                  {library === 'chunkdown' && (
-                    <div>
-                      <label
-                        htmlFor="max-overflow"
-                        className="block text-sm font-medium mb-1 text-black dark:text-white"
-                      >
-                        Max Overflow: {maxOverflowRatio}
-                      </label>
-                      <div className="flex items-center gap-2 mb-2">
-                        <input
-                          id="max-overflow"
-                          type="range"
-                          min="1.0"
-                          max="3.0"
-                          step="0.1"
-                          value={maxOverflowRatio}
-                          onChange={(e) =>
-                            setMaxOverflowRatio(Number(e.target.value))
-                          }
-                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                        />
-                        <input
-                          type="number"
-                          min="1.0"
-                          max="3.0"
-                          step="0.1"
-                          value={maxOverflowRatio}
-                          onChange={(e) =>
-                            setMaxOverflowRatio(Number(e.target.value))
-                          }
-                          className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>1.0</span>
-                        <span>3.0</span>
-                      </div>
-                    </div>
-                  )}
-                  </div>
-                </div>
-              }
             >
-              <ChunkVisualizer
+              <ChunkVisualizerWithOptions
                 text={text}
                 splitterId={library}
                 algorithm={getCurrentAlgorithm()}
@@ -1241,12 +910,21 @@ function HomeContent() {
                   chunkOverlap: 0,
                   maxOverflowRatio,
                 }}
+                onLibraryChange={(lib) => handleLibraryChange(lib as Library)}
+                onAlgorithmChange={handleAlgorithmChange}
+                onConfigChange={(updates) => {
+                  if (updates.chunkSize !== undefined) setChunkSize(updates.chunkSize);
+                  if (updates.maxOverflowRatio !== undefined) setMaxOverflowRatio(updates.maxOverflowRatio);
+                }}
+                availableAlgorithms={getAvailableAlgorithms()}
+                onTooltipMouseEnter={handleTooltipMouseEnter}
+                onTooltipMouseLeave={handleTooltipMouseLeave}
               />
             </Container>
           </div>
 
           {/* Comparison Panels - using same Container component */}
-          {comparisonPanels.map((panel) => {
+          {comparisonPanels.map((panel, index) => {
             const panelAlgorithm = panel.library === 'chunkdown' ? panel.chunkdownAlgorithm :
                                    panel.library === 'mastra' ? panel.mastraAlgorithm :
                                    panel.langchainAlgorithm;
@@ -1259,7 +937,7 @@ function HomeContent() {
                   : layoutMode === 'row' ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
               >
                 <Container
-                  label={`Chunks - ${splitterRegistry.get(panel.library)?.name || panel.library}`}
+                  label={`Chunks #${index + 2}`}
                   layoutMode={layoutMode}
                   collapsed={false}
                   onToggleCollapse={() => {}}
@@ -1269,152 +947,8 @@ function HomeContent() {
                   canMoveRight={canMoveComparisonPanel(panel.id, 'right')}
                   showCloseButton={true}
                   onClose={() => removeComparisonPanel(panel.id)}
-                  toggleableLabel="Library"
-                  toggleableButtonContent={
-                    <span className="flex items-center gap-1.5">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      {splitterRegistry.get(panel.library)?.name || panel.library}
-                    </span>
-                  }
-                  toggleableVisible={libraryOptionsVisible}
-                  onToggleVisible={() => setLibraryOptionsVisible(!libraryOptionsVisible)}
-                  toggleableSection={
-                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
-                      <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <label className="text-sm font-medium text-black dark:text-white">
-                            Library
-                          </label>
-                        </div>
-                        <button
-                          onClick={() => setLibraryOptionsVisible(false)}
-                          type="button"
-                          title="Hide Library"
-                          className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="p-4 space-y-4">
-                        {/* Library Picker */}
-                        <div>
-                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                            Library
-                          </label>
-                          <select
-                            value={panel.library}
-                            onChange={(e) => updateComparisonPanel(panel.id, { library: e.target.value as Library })}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                          >
-                            {splitterRegistry.getAll().map((splitter) => (
-                              <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
-                                {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Algorithm Picker */}
-                        <div>
-                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                            Algorithm
-                          </label>
-                          <select
-                            value={panelAlgorithm}
-                            onChange={(e) => {
-                              if (panel.library === 'chunkdown') {
-                                updateComparisonPanel(panel.id, { chunkdownAlgorithm: e.target.value as ChunkdownAlgorithm });
-                              } else if (panel.library === 'mastra') {
-                                updateComparisonPanel(panel.id, { mastraAlgorithm: e.target.value as MastraAlgorithm });
-                              } else {
-                                updateComparisonPanel(panel.id, { langchainAlgorithm: e.target.value as LangchainAlgorithm });
-                              }
-                            }}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                          >
-                            {(splitterRegistry.get(panel.library)?.algorithms || []).map((alg: string) => (
-                              <option key={alg} value={alg}>
-                                {alg.charAt(0).toUpperCase() + alg.slice(1)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {/* Chunk Size Control */}
-                        <div>
-                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                            Chunk Size: {panel.chunkSize}
-                          </label>
-                          <div className="flex items-center gap-2 mb-2">
-                            <input
-                              type="range"
-                              min="1"
-                              max="2000"
-                              value={panel.chunkSize}
-                              onChange={(e) => updateComparisonPanel(panel.id, { chunkSize: Number(e.target.value) })}
-                              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                            />
-                            <input
-                              type="number"
-                              min="1"
-                              max="2000"
-                              value={panel.chunkSize}
-                              onChange={(e) => updateComparisonPanel(panel.id, { chunkSize: Number(e.target.value) })}
-                              className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                            />
-                          </div>
-                          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <span>1</span>
-                            <span>2000</span>
-                          </div>
-                        </div>
-
-                        {/* Chunkdown-specific: Max Overflow Ratio */}
-                        {panel.library === 'chunkdown' && (
-                          <div>
-                            <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                              Max Overflow: {panel.maxOverflowRatio}
-                            </label>
-                            <div className="flex items-center gap-2 mb-2">
-                              <input
-                                type="range"
-                                min="1.0"
-                                max="3.0"
-                                step="0.1"
-                                value={panel.maxOverflowRatio}
-                                onChange={(e) => updateComparisonPanel(panel.id, { maxOverflowRatio: Number(e.target.value) })}
-                                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                              />
-                              <input
-                                type="number"
-                                min="1.0"
-                                max="3.0"
-                                step="0.1"
-                                value={panel.maxOverflowRatio}
-                                onChange={(e) => updateComparisonPanel(panel.id, { maxOverflowRatio: Number(e.target.value) })}
-                                className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
-                              />
-                            </div>
-                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                              <span>1.0</span>
-                              <span>3.0</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  }
                 >
-                  <ChunkVisualizer
+                  <ChunkVisualizerWithOptions
                     text={text}
                     splitterId={panel.library}
                     algorithm={panelAlgorithm}
@@ -1423,6 +957,22 @@ function HomeContent() {
                       chunkOverlap: 0,
                       maxOverflowRatio: panel.maxOverflowRatio,
                     }}
+                    onLibraryChange={(lib) => updateComparisonPanel(panel.id, { library: lib as Library })}
+                    onAlgorithmChange={(alg) => {
+                      if (panel.library === 'chunkdown') {
+                        updateComparisonPanel(panel.id, { chunkdownAlgorithm: alg as ChunkdownAlgorithm });
+                      } else if (panel.library === 'mastra') {
+                        updateComparisonPanel(panel.id, { mastraAlgorithm: alg as MastraAlgorithm });
+                      } else {
+                        updateComparisonPanel(panel.id, { langchainAlgorithm: alg as LangchainAlgorithm });
+                      }
+                    }}
+                    onConfigChange={(updates) => {
+                      updateComparisonPanel(panel.id, updates);
+                    }}
+                    availableAlgorithms={splitterRegistry.get(panel.library)?.algorithms || []}
+                    onTooltipMouseEnter={handleTooltipMouseEnter}
+                    onTooltipMouseLeave={handleTooltipMouseLeave}
                   />
                 </Container>
               </div>

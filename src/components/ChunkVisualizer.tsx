@@ -151,7 +151,7 @@ function ChunkVisualizer({
       {/* Chunk Visualization */}
       <div
         ref={visualizationRef}
-        className="border border-gray-300 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 flex-1 overflow-y-auto relative"
+        className="flex-1 overflow-y-auto relative"
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
       >
@@ -160,7 +160,7 @@ function ChunkVisualizer({
           <button
             type="button"
             onClick={handleCopyChunks}
-            className="absolute top-2 right-2 p-1.5 bg-white/70 dark:bg-gray-700/70 border border-gray-300/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-200 rounded hover:bg-white dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-all z-10 shadow-sm"
+            className="absolute top-0 right-0 p-1.5 bg-white/70 dark:bg-gray-700/70 border border-gray-300/70 dark:border-gray-600/70 text-gray-700 dark:text-gray-200 rounded hover:bg-white dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition-all z-10 shadow-sm"
             title="Copy chunks as JSON array"
           >
             <svg
