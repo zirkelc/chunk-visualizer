@@ -45,6 +45,17 @@ type ChunkdownAlgorithm = 'markdown';
 type LangchainAlgorithm = 'markdown' | 'character' | 'sentence';
 type MastraAlgorithm = 'recursive' | 'character' | 'markdown';
 
+// Comparison panel configuration
+interface ComparisonPanel {
+  id: string;
+  library: Library;
+  chunkdownAlgorithm: ChunkdownAlgorithm;
+  langchainAlgorithm: LangchainAlgorithm;
+  mastraAlgorithm: MastraAlgorithm;
+  chunkSize: number;
+  maxOverflowRatio: number;
+}
+
 // Helper functions for URL state
 const encodeText = (text: string) => {
   try {
@@ -82,6 +93,9 @@ function HomeContent() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutMode, setLayoutMode] = useState<'column' | 'row'>('column');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  
+  // Comparison panels state
+  const [comparisonPanels, setComparisonPanels] = useState<ComparisonPanel[]>([]);
 
   // Section collapse states
   const [inputCollapsed, setInputCollapsed] = useState(false);
@@ -221,6 +235,19 @@ function HomeContent() {
       // Default to light theme
       setTheme('light');
     }
+
+    // Load comparison panels
+    const comparisonData = params.get('comparison');
+    if (comparisonData) {
+      try {
+        const panels = JSON.parse(decodeURIComponent(comparisonData)) as ComparisonPanel[];
+        setComparisonPanels(panels);
+      } catch (e) {
+        console.error('Failed to parse comparison panels:', e);
+      }
+    }
+
+
 
     setIsInitialized(true);
   }, [searchParams]);
@@ -410,6 +437,11 @@ function HomeContent() {
       params.set('theme', theme);
     }
 
+    // Store comparison panels
+    if (comparisonPanels.length > 0) {
+      params.set('comparison', encodeURIComponent(JSON.stringify(comparisonPanels)));
+    }
+
     const newUrl = params.toString() ? `?${params.toString()}` : '/';
 
     try {
@@ -440,6 +472,7 @@ function HomeContent() {
     statsVisible,
     libraryOptionsVisible,
     sectionOrder,
+    comparisonPanels,
     isInitialized,
     router,
   ]);
@@ -551,6 +584,60 @@ function HomeContent() {
     setTooltip(null);
   };
 
+  // Comparison panel management
+  const addComparisonPanel = () => {
+    // Find next available library that's not in use
+    const availableLibraries = splitterRegistry.getAll().filter(s => !s.disabled).map(s => s.id as Library);
+    const usedLibraries = new Set([library, ...comparisonPanels.map(p => p.library)]);
+    const nextLibrary = availableLibraries.find(lib => !usedLibraries.has(lib)) || availableLibraries[0];
+    
+    const newPanel: ComparisonPanel = {
+      id: `panel-${Date.now()}`,
+      library: nextLibrary,
+      chunkdownAlgorithm: 'markdown',
+      langchainAlgorithm: 'markdown',
+      mastraAlgorithm: 'recursive',
+      chunkSize: 200,
+      maxOverflowRatio: 1.5,
+    };
+    
+    setComparisonPanels([...comparisonPanels, newPanel]);
+  };
+  
+  const removeComparisonPanel = (panelId: string) => {
+    setComparisonPanels(comparisonPanels.filter(p => p.id !== panelId));
+  };
+  
+  const updateComparisonPanel = (panelId: string, updates: Partial<ComparisonPanel>) => {
+    setComparisonPanels(comparisonPanels.map(p => 
+      p.id === panelId ? { ...p, ...updates } : p
+    ));
+  };
+
+  // Move comparison panel
+  const moveComparisonPanel = (panelId: string, direction: 'left' | 'right') => {
+    const currentIndex = comparisonPanels.findIndex(p => p.id === panelId);
+    if (currentIndex === -1) return;
+
+    const newIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+
+    // Check bounds
+    if (newIndex < 0 || newIndex >= comparisonPanels.length) return;
+
+    const newPanels = [...comparisonPanels];
+    [newPanels[currentIndex], newPanels[newIndex]] = [newPanels[newIndex], newPanels[currentIndex]];
+    setComparisonPanels(newPanels);
+  };
+
+  // Check if comparison panel can move
+  const canMoveComparisonPanel = (panelId: string, direction: 'left' | 'right') => {
+    const currentIndex = comparisonPanels.findIndex(p => p.id === panelId);
+    if (currentIndex === -1) return false;
+    
+    if (direction === 'left') return currentIndex > 0;
+    return currentIndex < comparisonPanels.length - 1;
+  };
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 font-mono flex flex-col h-screen overflow-hidden">
       <div className="max-w-[2400px] mx-auto px-4 py-4 w-full flex flex-col h-full overflow-hidden">
@@ -558,36 +645,41 @@ function HomeContent() {
         <div className="mb-4 flex-shrink-0">
           {/* Buttons Row - Always on top on small screens */}
           <div className="flex items-center justify-between mb-2 md:mb-2">
-            {/* Left: Layout Toggle */}
-            <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
-              <button
-                onClick={() => setLayoutMode('row')}
-                type="button"
-                title="Stack layout (4 rows)"
-                className={`p-2 transition-colors ${
-                  layoutMode === 'row'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setLayoutMode('column')}
-                type="button"
-                title="Column layout (4 columns)"
-                className={`p-2 border-l border-gray-300 dark:border-gray-600 transition-colors ${
-                  layoutMode === 'column'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 4v16M15 4v16" />
-                </svg>
-              </button>
+            {/* Left: Layout Toggle and Comparison Controls */}
+            <div className="flex items-center gap-2">
+              {/* Layout Toggle */}
+              <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+                <button
+                  onClick={() => setLayoutMode('row')}
+                  type="button"
+                  title="Stack layout (4 rows)"
+                  className={`p-2 transition-colors ${
+                    layoutMode === 'row'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setLayoutMode('column')}
+                  type="button"
+                  title="Column layout (4 columns)"
+                  className={`p-2 border-l border-gray-300 dark:border-gray-600 transition-colors ${
+                    layoutMode === 'column'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 4v16M15 4v16" />
+                  </svg>
+                </button>
+              </div>
+
+
             </div>
 
             {/* Right: Theme, GitHub, Share */}
@@ -750,13 +842,13 @@ function HomeContent() {
 
         {/* Main Content - Toggle between Column and Row Layout */}
         <div className={layoutMode === 'column' ?
-          (inputCollapsed || chunksCollapsed ? 'flex gap-4 flex-1 min-h-0 overflow-hidden' : 'grid grid-cols-2 gap-4 flex-1 min-h-0 overflow-hidden')
+          'flex gap-4 flex-1 min-h-0 overflow-hidden'
           : 'flex-1 min-h-0 overflow-hidden'}>
-          <div className={layoutMode === 'row' ? 'flex flex-col gap-4 h-full overflow-y-auto' : 'contents'}>
+          <div className={layoutMode === 'row' ? 'flex flex-col gap-4 h-full overflow-y-auto' : layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0 overflow-x-auto w-full' : 'contents'}>
           {/* Input */}
           <div
             className={layoutMode === 'column' && !inputCollapsed ?
-              (chunksCollapsed ? 'flex-1 min-h-0 overflow-hidden' : 'min-h-0 overflow-hidden')
+              'flex-1 min-w-[400px] min-h-0 overflow-hidden'
               : layoutMode === 'row' && !inputCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
             style={{ order: getSectionOrder('input') }}
           >
@@ -955,7 +1047,7 @@ function HomeContent() {
           {/* Chunks */}
           <div
             className={layoutMode === 'column' && !chunksCollapsed ?
-              (inputCollapsed ? 'flex-1 min-h-0 overflow-hidden' : 'min-h-0 overflow-hidden')
+              'flex-1 min-w-[400px] min-h-0 overflow-hidden'
               : layoutMode === 'row' && !chunksCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
             style={{ order: getSectionOrder('chunks') }}
           >
@@ -980,6 +1072,19 @@ function HomeContent() {
               }
               toggleableVisible={libraryOptionsVisible}
               onToggleVisible={() => setLibraryOptionsVisible(!libraryOptionsVisible)}
+              additionalActionButton={
+                <button
+                  onClick={addComparisonPanel}
+                  type="button"
+                  title="Add library for comparison"
+                  className="px-2 py-1 text-xs font-medium bg-green-500 hover:bg-green-600 text-white rounded transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Compare
+                </button>
+              }
               toggleableSection={
                 <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
                   <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
@@ -1139,6 +1244,190 @@ function HomeContent() {
               />
             </Container>
           </div>
+
+          {/* Comparison Panels - using same Container component */}
+          {comparisonPanels.map((panel) => {
+            const panelAlgorithm = panel.library === 'chunkdown' ? panel.chunkdownAlgorithm :
+                                   panel.library === 'mastra' ? panel.mastraAlgorithm :
+                                   panel.langchainAlgorithm;
+            
+            return (
+              <div
+                key={panel.id}
+                className={layoutMode === 'column' ?
+                  'flex-1 min-w-[400px] min-h-0 overflow-hidden'
+                  : layoutMode === 'row' ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
+              >
+                <Container
+                  label={`Chunks - ${splitterRegistry.get(panel.library)?.name || panel.library}`}
+                  layoutMode={layoutMode}
+                  collapsed={false}
+                  onToggleCollapse={() => {}}
+                  onMoveLeft={() => moveComparisonPanel(panel.id, 'left')}
+                  onMoveRight={() => moveComparisonPanel(panel.id, 'right')}
+                  canMoveLeft={canMoveComparisonPanel(panel.id, 'left')}
+                  canMoveRight={canMoveComparisonPanel(panel.id, 'right')}
+                  showCloseButton={true}
+                  onClose={() => removeComparisonPanel(panel.id)}
+                  toggleableLabel="Library"
+                  toggleableButtonContent={
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {splitterRegistry.get(panel.library)?.name || panel.library}
+                    </span>
+                  }
+                  toggleableVisible={libraryOptionsVisible}
+                  onToggleVisible={() => setLibraryOptionsVisible(!libraryOptionsVisible)}
+                  toggleableSection={
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg">
+                      <div className="flex items-center justify-between p-3 border-b border-gray-300 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <label className="text-sm font-medium text-black dark:text-white">
+                            Library
+                          </label>
+                        </div>
+                        <button
+                          onClick={() => setLibraryOptionsVisible(false)}
+                          type="button"
+                          title="Hide Library"
+                          className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="p-4 space-y-4">
+                        {/* Library Picker */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                            Library
+                          </label>
+                          <select
+                            value={panel.library}
+                            onChange={(e) => updateComparisonPanel(panel.id, { library: e.target.value as Library })}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
+                          >
+                            {splitterRegistry.getAll().map((splitter) => (
+                              <option key={splitter.id} value={splitter.id} disabled={splitter.disabled}>
+                                {splitter.name} v{splitter.version}{splitter.disabled ? ' (disabled)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Algorithm Picker */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                            Algorithm
+                          </label>
+                          <select
+                            value={panelAlgorithm}
+                            onChange={(e) => {
+                              if (panel.library === 'chunkdown') {
+                                updateComparisonPanel(panel.id, { chunkdownAlgorithm: e.target.value as ChunkdownAlgorithm });
+                              } else if (panel.library === 'mastra') {
+                                updateComparisonPanel(panel.id, { mastraAlgorithm: e.target.value as MastraAlgorithm });
+                              } else {
+                                updateComparisonPanel(panel.id, { langchainAlgorithm: e.target.value as LangchainAlgorithm });
+                              }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
+                          >
+                            {(splitterRegistry.get(panel.library)?.algorithms || []).map((alg: string) => (
+                              <option key={alg} value={alg}>
+                                {alg.charAt(0).toUpperCase() + alg.slice(1)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Chunk Size Control */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                            Chunk Size: {panel.chunkSize}
+                          </label>
+                          <div className="flex items-center gap-2 mb-2">
+                            <input
+                              type="range"
+                              min="1"
+                              max="2000"
+                              value={panel.chunkSize}
+                              onChange={(e) => updateComparisonPanel(panel.id, { chunkSize: Number(e.target.value) })}
+                              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                            />
+                            <input
+                              type="number"
+                              min="1"
+                              max="2000"
+                              value={panel.chunkSize}
+                              onChange={(e) => updateComparisonPanel(panel.id, { chunkSize: Number(e.target.value) })}
+                              className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                            />
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                            <span>1</span>
+                            <span>2000</span>
+                          </div>
+                        </div>
+
+                        {/* Chunkdown-specific: Max Overflow Ratio */}
+                        {panel.library === 'chunkdown' && (
+                          <div>
+                            <label className="block text-sm font-medium mb-1 text-black dark:text-white">
+                              Max Overflow: {panel.maxOverflowRatio}
+                            </label>
+                            <div className="flex items-center gap-2 mb-2">
+                              <input
+                                type="range"
+                                min="1.0"
+                                max="3.0"
+                                step="0.1"
+                                value={panel.maxOverflowRatio}
+                                onChange={(e) => updateComparisonPanel(panel.id, { maxOverflowRatio: Number(e.target.value) })}
+                                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                              />
+                              <input
+                                type="number"
+                                min="1.0"
+                                max="3.0"
+                                step="0.1"
+                                value={panel.maxOverflowRatio}
+                                onChange={(e) => updateComparisonPanel(panel.id, { maxOverflowRatio: Number(e.target.value) })}
+                                className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                              />
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                              <span>1.0</span>
+                              <span>3.0</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  }
+                >
+                  <ChunkVisualizer
+                    text={text}
+                    splitterId={panel.library}
+                    algorithm={panelAlgorithm}
+                    config={{
+                      chunkSize: panel.chunkSize,
+                      chunkOverlap: 0,
+                      maxOverflowRatio: panel.maxOverflowRatio,
+                    }}
+                  />
+                </Container>
+              </div>
+            );
+          })}
           </div>
         </div>
 

@@ -18,6 +18,11 @@ interface ContainerProps {
   toggleableButtonContent?: ReactNode; // Custom button content (overrides toggleableLabel)
   toggleableVisible?: boolean;
   onToggleVisible?: () => void;
+  // Optional additional action button
+  additionalActionButton?: ReactNode;
+  // Optional close button
+  showCloseButton?: boolean;
+  onClose?: () => void;
 }
 
 export function Container({
@@ -35,6 +40,9 @@ export function Container({
   toggleableButtonContent,
   toggleableVisible = false,
   onToggleVisible,
+  additionalActionButton,
+  showCloseButton = false,
+  onClose,
 }: ContainerProps) {
   const hasToggleable = toggleableSection && onToggleVisible;
 
@@ -92,6 +100,9 @@ export function Container({
                   {toggleableButtonContent || toggleableLabel || 'Options'}
                 </button>
               )}
+
+              {/* Additional action button (e.g., Compare button) */}
+              {additionalActionButton}
             </div>
 
             {/* Right side controls - arrows and collapse button */}
@@ -126,6 +137,20 @@ export function Container({
                   )}
                 </svg>
               </button>
+
+              {/* Close button (optional) */}
+              {showCloseButton && onClose && (
+                <button
+                  onClick={onClose}
+                  type="button"
+                  title="Remove this panel"
+                  className="p-1 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
 
               {/* Collapse button */}
               <button
