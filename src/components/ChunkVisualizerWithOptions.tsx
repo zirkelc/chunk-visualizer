@@ -46,7 +46,7 @@ export function ChunkVisualizerWithOptions({
   onTooltipMouseEnter,
   onTooltipMouseLeave,
 }: ChunkVisualizerWithOptionsProps) {
-  const [viewMode, setViewMode] = useState<'options' | 'stats' | 'collapsed'>('options');
+  const [viewMode, setViewMode] = useState<'options' | 'stats' | 'none'>('options');
   const splitter = splitterRegistry.get(splitterId);
   const libraryName = splitter?.name || splitterId;
 
@@ -137,7 +137,7 @@ export function ChunkVisualizerWithOptions({
         <div className="flex items-center gap-2">
           {/* Library Button */}
           <button
-            onClick={() => setViewMode('options')}
+            onClick={() => setViewMode(viewMode === 'options' ? 'none' : 'options')}
             type="button"
             className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors border ${
               viewMode === 'options'
@@ -155,7 +155,7 @@ export function ChunkVisualizerWithOptions({
 
           {/* Stats Button */}
           <button
-            onClick={() => setViewMode('stats')}
+            onClick={() => setViewMode(viewMode === 'stats' ? 'none' : 'stats')}
             type="button"
             className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors border ${
               viewMode === 'stats'
@@ -173,13 +173,13 @@ export function ChunkVisualizerWithOptions({
 
         {/* Minimize/Expand Button on the right */}
         <button
-          onClick={() => setViewMode(viewMode === 'collapsed' ? 'options' : 'collapsed')}
+          onClick={() => setViewMode(viewMode === 'none' ? 'options' : 'none')}
           type="button"
           className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-          title={viewMode === 'collapsed' ? 'Expand' : 'Minimize'}
+          title={viewMode === 'none' ? 'Expand' : 'Minimize'}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {viewMode === 'collapsed' ? (
+            {viewMode === 'none' ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             ) : (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -189,10 +189,9 @@ export function ChunkVisualizerWithOptions({
       </div>
 
       {/* Scrollable container for options/stats and chunks */}
-      {viewMode !== 'collapsed' && (
-        <div className="flex-1 overflow-y-auto">
-          {/* Library Options Section */}
-          {viewMode === 'options' && (
+      <div className="flex-1 overflow-y-auto">
+        {/* Library Options Section */}
+        {viewMode === 'options' && (
           <>
             <div className="p-4 bg-white dark:bg-gray-800 space-y-4">
               {/* Library Picker */}
@@ -447,17 +446,16 @@ export function ChunkVisualizerWithOptions({
           </>
         )}
 
-          {/* Chunk Visualization */}
-          <div className="p-4">
-            <ChunkVisualizer
-              text={text}
-              splitterId={splitterId}
-              algorithm={algorithm}
-              config={config}
-            />
-          </div>
+        {/* Chunk Visualization */}
+        <div className="p-4">
+          <ChunkVisualizer
+            text={text}
+            splitterId={splitterId}
+            algorithm={algorithm}
+            config={config}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 }

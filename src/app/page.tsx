@@ -55,6 +55,7 @@ interface ComparisonPanel {
   mastraAlgorithm: MastraAlgorithm;
   chunkSize: number;
   maxOverflowRatio: number;
+  collapsed?: boolean;
 }
 
 // Helper functions for URL state
@@ -106,8 +107,8 @@ function HomeContent() {
   const [statsVisible, setStatsVisible] = useState(false);
   const [libraryOptionsVisible, setLibraryOptionsVisible] = useState(true);
 
-  // Section order state
-  type SectionId = 'input' | 'chunks';
+  // Section order state - now includes comparison panels
+  type SectionId = 'input' | 'chunks' | string; // string for panel IDs
   const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['input', 'chunks']);
 
   // Chunks and statistics state
@@ -205,8 +206,8 @@ function HomeContent() {
     const orderParam = params.get('sectionOrder');
     if (orderParam) {
       const order = orderParam.split(',') as SectionId[];
-      // Validate order contains all sections
-      if (order.length === 2 &&
+      // Validate order contains at least input and chunks
+      if (order.length >= 2 &&
           order.includes('input') &&
           order.includes('chunks')) {
         setSectionOrder(order);
@@ -243,6 +244,14 @@ function HomeContent() {
       try {
         const panels = JSON.parse(decodeURIComponent(comparisonData)) as ComparisonPanel[];
         setComparisonPanels(panels);
+        
+        // Add panel IDs to section order if not already present (for backward compatibility)
+        const loadedOrder = orderParam ? orderParam.split(',') as SectionId[] : ['input', 'chunks'];
+        const panelIds = panels.map(p => p.id);
+        const missingPanelIds = panelIds.filter(id => !loadedOrder.includes(id));
+        if (missingPanelIds.length > 0) {
+          setSectionOrder([...loadedOrder, ...missingPanelIds]);
+        }
       } catch (e) {
         console.error('Failed to parse comparison panels:', e);
       }
@@ -603,10 +612,14 @@ function HomeContent() {
     };
     
     setComparisonPanels([...comparisonPanels, newPanel]);
+    // Add to section order at the end
+    setSectionOrder([...sectionOrder, newPanel.id]);
   };
   
   const removeComparisonPanel = (panelId: string) => {
     setComparisonPanels(comparisonPanels.filter(p => p.id !== panelId));
+    // Remove from section order
+    setSectionOrder(sectionOrder.filter(id => id !== panelId));
   };
   
   const updateComparisonPanel = (panelId: string, updates: Partial<ComparisonPanel>) => {
@@ -615,39 +628,118 @@ function HomeContent() {
     ));
   };
 
-  // Move comparison panel
-  const moveComparisonPanel = (panelId: string, direction: 'left' | 'right') => {
-    const currentIndex = comparisonPanels.findIndex(p => p.id === panelId);
-    if (currentIndex === -1) return;
 
-    const newIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
-
-    // Check bounds
-    if (newIndex < 0 || newIndex >= comparisonPanels.length) return;
-
-    const newPanels = [...comparisonPanels];
-    [newPanels[currentIndex], newPanels[newIndex]] = [newPanels[newIndex], newPanels[currentIndex]];
-    setComparisonPanels(newPanels);
-  };
-
-  // Check if comparison panel can move
-  const canMoveComparisonPanel = (panelId: string, direction: 'left' | 'right') => {
-    const currentIndex = comparisonPanels.findIndex(p => p.id === panelId);
-    if (currentIndex === -1) return false;
-    
-    if (direction === 'left') return currentIndex > 0;
-    return currentIndex < comparisonPanels.length - 1;
-  };
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 font-mono flex flex-col h-screen overflow-hidden">
       <div className="max-w-[2400px] mx-auto px-4 py-4 w-full flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
-          {/* Buttons Row - Always on top on small screens */}
-          <div className="flex items-center justify-between mb-2 md:mb-2">
-            {/* Left: Layout Toggle and Comparison Controls */}
-            <div className="flex items-center gap-2">
+          {/* Header - Inline on large screens, stacked on small screens */}
+          <div className="lg:grid lg:grid-cols-3 lg:items-center mb-4">
+            {/* Mobile: Buttons Row */}
+            <div className="flex items-center justify-between gap-2 mb-4 lg:hidden">
+              {/* Left: Layout Toggle */}
+              <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+                <button
+                  onClick={() => setLayoutMode('row')}
+                  type="button"
+                  title="Stack layout (4 rows)"
+                  className={`p-2 transition-colors ${
+                    layoutMode === 'row'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setLayoutMode('column')}
+                  type="button"
+                  title="Column layout (4 columns)"
+                  className={`p-2 border-l border-gray-300 dark:border-gray-600 transition-colors ${
+                    layoutMode === 'column'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 4v16M15 4v16" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Right buttons - icons only on mobile */}
+              <div className="flex items-center gap-2">
+                {/* Theme Toggle Icon Only (mobile) */}
+                <button
+                  onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                  type="button"
+                  title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                >
+                  {theme === 'light' ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* GitHub Icon Only (mobile) */}
+                <a
+                  href="https://github.com/zirkelc/chunk-visualizer"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="View source code on GitHub"
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </a>
+
+                {/* Share Icon Only (mobile) */}
+                <button
+                  onClick={handleShare}
+                  type="button"
+                  title="Copy shareable URL to clipboard"
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Large screen: Left */}
+            <div className="hidden lg:flex items-center gap-2 lg:justify-start">
               {/* Layout Toggle */}
               <div className="inline-flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
                 <button
@@ -683,14 +775,21 @@ function HomeContent() {
 
             </div>
 
+            {/* Center: Title (hidden on mobile, shown inline on large screens) */}
+            <div className="hidden lg:flex justify-center items-center">
+              <h1 className="text-4xl font-bold text-black dark:text-white">
+                Chunk Visualizer
+              </h1>
+            </div>
+
             {/* Right: Theme, GitHub, Share */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 lg:justify-end">
               {/* Theme Toggle */}
               <button
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 type="button"
                 title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 {theme === 'light' ? (
                   <>
@@ -715,7 +814,7 @@ function HomeContent() {
                 onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
                 type="button"
                 title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                className="sm:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 {theme === 'light' ? (
                   <>
@@ -739,7 +838,7 @@ function HomeContent() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View source code on GitHub"
-                className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 <svg
                   className="w-4 h-4"
@@ -762,7 +861,7 @@ function HomeContent() {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="View source code on GitHub"
-                className="sm:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 <svg
                   className="w-4 h-4"
@@ -783,7 +882,7 @@ function HomeContent() {
                 onClick={handleShare}
                 type="button"
                 title="Copy shareable URL to clipboard"
-                className="hidden sm:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden lg:flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 <svg
                   className="w-4 h-4"
@@ -807,7 +906,7 @@ function HomeContent() {
                 onClick={handleShare}
                 type="button"
                 title="Copy shareable URL to clipboard"
-                className="sm:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                className="hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
               >
                 <svg
                   className="w-4 h-4"
@@ -827,17 +926,27 @@ function HomeContent() {
             </div>
           </div>
 
-          {/* Title Row */}
-          <div className="text-center">
+          {/* Title Row (mobile and tablet - stacked below buttons) */}
+          <div className="block lg:hidden text-center mb-4">
             <h1 className="text-4xl font-bold mb-2 text-black dark:text-white">
               Chunk Visualizer
             </h1>
-            <p className="text-black dark:text-gray-300">
+            <p className="text-sm text-black dark:text-gray-300">
               Visual comparison of text chunking algorithms from various libraries.
-              </p>
-              <p className="text-black dark:text-gray-300">
+            </p>
+            <p className="text-sm text-black dark:text-gray-300">
               Missing a library? Send a pull request to <a href="https://github.com/zirkelc/chunk-visualizer" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">GitHub</a>.
-              </p>
+            </p>
+          </div>
+
+          {/* Description (large screens only - below inline header) */}
+          <div className="hidden lg:block text-center mb-4">
+            <p className="text-sm text-black dark:text-gray-300">
+              Visual comparison of text chunking algorithms from various libraries.
+            </p>
+            <p className="text-sm text-black dark:text-gray-300">
+              Missing a library? Send a pull request to <a href="https://github.com/zirkelc/chunk-visualizer" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">GitHub</a>.
+            </p>
           </div>
         </div>
 
@@ -892,7 +1001,7 @@ function HomeContent() {
                   onClick={addComparisonPanel}
                   type="button"
                   title="Add library for comparison"
-                  className="px-2 py-1 text-xs font-medium bg-green-500 hover:bg-green-600 text-white rounded transition-colors flex items-center gap-1"
+                  className="px-2 py-1 text-xs font-medium bg-transparent text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-700 dark:hover:border-green-300 rounded transition-colors flex items-center gap-1"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -932,19 +1041,20 @@ function HomeContent() {
             return (
               <div
                 key={panel.id}
-                className={layoutMode === 'column' ?
+                className={layoutMode === 'column' && !panel.collapsed ?
                   'flex-1 min-w-[400px] min-h-0 overflow-hidden'
-                  : layoutMode === 'row' ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
+                  : layoutMode === 'row' && !panel.collapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
+                style={{ order: getSectionOrder(panel.id) }}
               >
                 <Container
                   label={`Chunks #${index + 2}`}
                   layoutMode={layoutMode}
-                  collapsed={false}
-                  onToggleCollapse={() => {}}
-                  onMoveLeft={() => moveComparisonPanel(panel.id, 'left')}
-                  onMoveRight={() => moveComparisonPanel(panel.id, 'right')}
-                  canMoveLeft={canMoveComparisonPanel(panel.id, 'left')}
-                  canMoveRight={canMoveComparisonPanel(panel.id, 'right')}
+                  collapsed={panel.collapsed || false}
+                  onToggleCollapse={() => updateComparisonPanel(panel.id, { collapsed: !panel.collapsed })}
+                  onMoveLeft={() => moveSection(panel.id as SectionId, 'left')}
+                  onMoveRight={() => moveSection(panel.id as SectionId, 'right')}
+                  canMoveLeft={canMove(panel.id as SectionId, 'left')}
+                  canMoveRight={canMove(panel.id as SectionId, 'right')}
                   showCloseButton={true}
                   onClose={() => removeComparisonPanel(panel.id)}
                 >
