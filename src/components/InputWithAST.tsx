@@ -63,12 +63,12 @@ function TreeNode({
   currentPath,
 }: TreeNodeProps) {
   const [isExpanded, setIsExpanded] = useState(true);
-  
+
   // For sections, check if heading or children exist
-  const hasChildren = isSection(node) 
+  const hasChildren = isSection(node)
     ? (node.heading !== undefined || (node.children && node.children.length > 0))
     : ('children' in node && node.children && node.children.length > 0);
-  
+
   const nodePath = currentPath; // Use the passed currentPath directly
 
   // Apply collapse all state (but not to root node at depth 0)
@@ -362,7 +362,7 @@ export default function InputWithAST({
     event: React.MouseEvent
   ) => {
     if (!position) return;
-    
+
     if (event.shiftKey) {
       // Add to selection or remove if already selected
       setSelectedPositions(prev => {
@@ -383,32 +383,32 @@ export default function InputWithAST({
   // Render text with highlighting
   const renderTextWithHighlight = () => {
     if (!text) return <>{text || ' '}</>;
-    
+
     // Combine selected positions and hovered position
     const positions = [...selectedPositions];
-    
+
     // Only add hover position if it doesn't overlap with any selection
     if (hoveredPosition) {
-      const hoverOverlapsSelection = selectedPositions.some(p => 
+      const hoverOverlapsSelection = selectedPositions.some(p =>
         // Check if hover overlaps with any selected region
         (hoveredPosition.start >= p.start && hoveredPosition.start < p.end) ||
         (hoveredPosition.end > p.start && hoveredPosition.end <= p.end) ||
         (hoveredPosition.start <= p.start && hoveredPosition.end >= p.end)
       );
-      
+
       if (!hoverOverlapsSelection) {
         positions.push({ ...hoveredPosition, path: 'hover' });
       }
     }
-    
+
     if (positions.length === 0) {
       return <>{text}</>;
     }
-    
+
     // Merge overlapping positions
     const mergedPositions: Array<{start: number; end: number; isHover: boolean}> = [];
     const sortedPositions = [...positions].sort((a, b) => a.start - b.start);
-    
+
     sortedPositions.forEach(pos => {
       const isHover = pos.path === 'hover';
       if (mergedPositions.length === 0) {
@@ -428,38 +428,38 @@ export default function InputWithAST({
         }
       }
     });
-    
+
     // Build text with highlights
     let result = [];
     let lastEnd = 0;
-    
+
     mergedPositions.forEach((pos, index) => {
       // Add text before this highlight
       if (pos.start > lastEnd) {
         result.push(text.substring(lastEnd, pos.start));
       }
-      
+
       // Skip if this position starts before lastEnd (shouldn't happen after merging, but safety check)
       if (pos.start >= lastEnd) {
-        const className = pos.isHover 
+        const className = pos.isHover
           ? "bg-blue-200 dark:bg-blue-600/50 text-black dark:text-white"
           : "bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white";
-        
+
         result.push(
           <mark key={`highlight-${index}`} className={className}>
             {text.substring(pos.start, pos.end)}
           </mark>
         );
-        
+
         lastEnd = pos.end;
       }
     });
-    
+
     // Add remaining text
     if (lastEnd < text.length) {
       result.push(text.substring(lastEnd));
     }
-    
+
     return <>{result}</>;
   };
 
@@ -476,7 +476,7 @@ export default function InputWithAST({
       {/* Text display with highlighting on the left - wrapper with height constraint */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
         {/* Markdown Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
+        <div className="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-900 dark:text-white">Markdown</span>
           </div>
@@ -498,11 +498,11 @@ export default function InputWithAST({
         {/* Markdown content */}
         {hasSelection || hoveredPosition ? (
           // Show read-only highlighted view when hovering/selecting
-          <div 
+          <div
             className="flex-1 p-3 overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white cursor-pointer"
             onClick={hasSelection ? handleClearSelection : undefined}
             title={hasSelection ? "Click to clear selection and edit" : undefined}
-            style={{ 
+            style={{
               wordBreak: 'break-all',
               overflowWrap: 'break-word',
               whiteSpace: 'pre-wrap'
@@ -530,7 +530,7 @@ export default function InputWithAST({
       {/* AST tree on the right - wrapper with height constraint */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
         {/* AST Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
+        <div className="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-900 dark:text-white">AST</span>
           </div>

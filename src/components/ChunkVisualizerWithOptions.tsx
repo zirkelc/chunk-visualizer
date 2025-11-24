@@ -133,7 +133,7 @@ export function ChunkVisualizerWithOptions({
   return (
     <div className="w-full h-full flex flex-col overflow-hidden border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
       {/* Header with Library and Stats buttons - Fixed at top */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
+      <div className="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
         <div className="flex items-center gap-2">
           {/* Library Button */}
           <button
