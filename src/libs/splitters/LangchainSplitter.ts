@@ -5,6 +5,7 @@ import {
 } from '@langchain/textsplitters';
 import packageJson from '../../../package.json';
 import type { TextSplitter, TextSplitterConfig, ConfigOption } from './types';
+import { chunkOverlapOptions, chunkSizeOptions } from './options';
 
 /**
  * LangChain text splitter implementation
@@ -17,7 +18,7 @@ export class LangchainSplitter implements TextSplitter {
   readonly algorithms = ['markdown', 'character', 'sentence'] as const;
 
   async splitText(text: string, config: TextSplitterConfig): Promise<string[]> {
-    const { chunkSize, chunkOverlap = 0, algorithm = 'markdown' } = config;
+    const { chunkSize = 200, chunkOverlap = 0, algorithm = 'markdown' } = config;
 
     let splitter;
 
@@ -51,7 +52,10 @@ export class LangchainSplitter implements TextSplitter {
   }
 
   getAlgorithmConfig(): ConfigOption[] {
-    // LangChain doesn't have algorithm-specific options beyond the common ones
-    return [];
+    // All LangChain algorithms support the same common options
+    return [
+        chunkSizeOptions,
+        chunkOverlapOptions,
+    ];
   }
 }

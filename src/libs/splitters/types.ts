@@ -2,7 +2,7 @@
  * Configuration for text splitting
  */
 export interface TextSplitterConfig {
-  chunkSize: number;
+  chunkSize?: number;
   chunkOverlap?: number;
   algorithm?: string;
   // Library-specific options can be added dynamically
@@ -52,7 +52,8 @@ export interface TextSplitter {
   splitText(text: string, config: TextSplitterConfig): Promise<string[]> | string[];
 
   /**
-   * Get algorithm-specific configuration options for UI rendering
+   * Get all configuration options for a specific algorithm for UI rendering
+   * This includes both common options (chunkSize, chunkOverlap) and algorithm-specific options
    * @param algorithm The algorithm name
    * @returns Array of configuration options
    */

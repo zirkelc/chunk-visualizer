@@ -1,6 +1,18 @@
 import { chunkdown } from 'chunkdown';
 import packageJson from '../../../package.json';
 import type { TextSplitter, TextSplitterConfig, ConfigOption } from './types';
+import { chunkSizeOptions } from './options';
+
+const maxOverflowRatioOption: ConfigOption = {
+    key: 'maxOverflowRatio',
+    label: 'Max Overflow Ratio',
+    type: 'range',
+    defaultValue: 1.5,
+    min: 1.0,
+    max: 3.0,
+    step: 0.1,
+    description: 'Maximum ratio by which a chunk can exceed the target chunk size',
+};
 
 /**
  * Chunkdown text splitter implementation
@@ -13,7 +25,7 @@ export class ChunkdownSplitter implements TextSplitter {
   readonly algorithms = ['markdown'] as const;
 
   splitText(text: string, config: TextSplitterConfig): string[] {
-    const { chunkSize, maxOverflowRatio = 1.5 } = config;
+    const { chunkSize = 200, maxOverflowRatio = 1.5 } = config;
 
     const splitter = chunkdown({
       chunkSize,
@@ -25,17 +37,8 @@ export class ChunkdownSplitter implements TextSplitter {
 
   getAlgorithmConfig(): ConfigOption[] {
     return [
-      {
-        key: 'maxOverflowRatio',
-        label: 'Max Overflow Ratio',
-        type: 'range',
-        defaultValue: 1.5,
-        min: 1.0,
-        max: 3.0,
-        step: 0.1,
-        description:
-          'Maximum ratio by which a chunk can exceed the target chunk size',
-      },
-    ];
+      chunkSizeOptions,
+        maxOverflowRatioOption,
+      ];
+    }
   }
-}

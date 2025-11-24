@@ -1,4 +1,5 @@
 import packageJson from '../../../package.json';
+import { chunkOverlapOptions, chunkSizeOptions } from './options';
 import type { TextSplitter, TextSplitterConfig, ConfigOption } from './types';
 
 /**
@@ -13,7 +14,7 @@ export class MastraSplitter implements TextSplitter {
 
   async splitText(text: string, config: TextSplitterConfig): Promise<string[]> {
     const { MDocument } = await import('@mastra/rag');
-    const { chunkSize, chunkOverlap = 0, algorithm = 'recursive' } = config;
+    const { chunkSize = 200, chunkOverlap = 0, algorithm = 'recursive' } = config;
 
     const doc = MDocument.fromText(text);
     const chunkedDoc = await doc.chunk({
@@ -26,6 +27,9 @@ export class MastraSplitter implements TextSplitter {
   }
 
   getAlgorithmConfig(): ConfigOption[] {
-    return [];
+    return [
+      chunkSizeOptions,
+      chunkOverlapOptions,
+    ];
   }
 }

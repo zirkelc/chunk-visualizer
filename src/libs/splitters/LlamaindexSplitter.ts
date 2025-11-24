@@ -1,6 +1,7 @@
 import { SentenceSplitter, MarkdownNodeParser, Document } from 'llamaindex';
 import packageJson from '../../../package.json';
 import type { TextSplitter, TextSplitterConfig, ConfigOption } from './types';
+import { chunkOverlapOptions, chunkSizeOptions } from './options';
 
 /**
  * LlamaIndex text splitter implementation
@@ -13,7 +14,7 @@ export class LlamaIndexSplitter implements TextSplitter {
   readonly algorithms = ['sentence', 'markdown'] as const;
 
   async splitText(text: string, config: TextSplitterConfig): Promise<string[]> {
-    const { chunkSize, chunkOverlap = 0, algorithm = 'markdown' } = config;
+    const { chunkSize = 200, chunkOverlap = 0, algorithm = 'markdown' } = config;
 
     switch (algorithm) {
       case 'sentence': {
@@ -25,6 +26,7 @@ export class LlamaIndexSplitter implements TextSplitter {
       }
 
       case 'markdown': {
+        // markdown parser doesn't support chunk size configuration
         const parser = new MarkdownNodeParser();
         const document = new Document({ text });
         const nodes = parser.getNodesFromDocuments([document]);
@@ -38,8 +40,19 @@ export class LlamaIndexSplitter implements TextSplitter {
     }
   }
 
-  getAlgorithmConfig(): ConfigOption[] {
-    // LlamaIndex doesn't have algorithm-specific options beyond the common ones
-    return [];
+  getAlgorithmConfig(algorithm: string): ConfigOption[] {
+    switch (algorithm) {
+      case 'markdown':
+        // Markdown parser doesn't have any configurable options
+        return [];
+      case 'sentence':
+        // Sentence splitter supports chunkSize and chunkOverlap
+        return [
+          chunkSizeOptions,
+          chunkOverlapOptions,
+        ];
+      default:
+        return [];
+    }
   }
 }
