@@ -33,7 +33,6 @@ export class LangchainSplitter implements TextSplitter {
         splitter = new CharacterTextSplitter({
           chunkSize,
           chunkOverlap,
-          separator: '',
         });
         break;
 
@@ -41,7 +40,6 @@ export class LangchainSplitter implements TextSplitter {
         splitter = new RecursiveCharacterTextSplitter({
           chunkSize,
           chunkOverlap,
-          separators: ['\n\n', '\n', '. ', '! ', '? ', ' ', ''],
         });
         break;
 

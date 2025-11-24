@@ -18,6 +18,12 @@ Available algorithms:
 - `character`
 - `sentence`
 
+### [llamaindex](https://www.npmjs.com/package/llamaindex)
+
+Available algorithms:
+- `sentence`
+- `markdown`
+
 ### ~~[@mastra/rag](https://www.npmjs.com/package/@mastra/rag)~~
 
 > [!NOTE]

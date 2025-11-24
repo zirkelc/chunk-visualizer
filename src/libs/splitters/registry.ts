@@ -1,5 +1,6 @@
 import { ChunkdownSplitter } from './ChunkdownSplitter';
 import { LangchainSplitter } from './LangchainSplitter';
+import { LlamaIndexSplitter } from './LlamaindexSplitter';
 import { MastraSplitter } from './MastraSplitter';
 import type { TextSplitter } from './types';
 
@@ -64,4 +65,5 @@ export const splitterRegistry = new SplitterRegistry();
 // Register all available splitters
 splitterRegistry.register(new ChunkdownSplitter());
 splitterRegistry.register(new LangchainSplitter());
+splitterRegistry.register(new LlamaIndexSplitter());
 splitterRegistry.register(new MastraSplitter());
