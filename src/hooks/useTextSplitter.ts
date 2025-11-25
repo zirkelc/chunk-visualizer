@@ -78,7 +78,7 @@ export function useTextSplitter({
     };
 
     splitText();
-  }, [text, splitterId, algorithm, JSON.stringify(config)]);
+  }, [text, splitterId, algorithm, config]);
 
   return { chunks, isLoading, error };
 }

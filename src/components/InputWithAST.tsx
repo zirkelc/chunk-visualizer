@@ -22,7 +22,11 @@ interface TreeNodeProps {
   parentPath?: string;
   collapseAll?: boolean;
   onNodeHover: (position: { start: number; end: number } | null) => void;
-  onNodeClick: (position: { start: number; end: number } | null, path: string, event: React.MouseEvent) => void;
+  onNodeClick: (
+    position: { start: number; end: number } | null,
+    path: string,
+    event: React.MouseEvent,
+  ) => void;
   selectedNodePaths: string[];
   currentPath: string;
 }
@@ -66,8 +70,8 @@ function TreeNode({
 
   // For sections, check if heading or children exist
   const hasChildren = isSection(node)
-    ? (node.heading !== undefined || (node.children && node.children.length > 0))
-    : ('children' in node && node.children && node.children.length > 0);
+    ? node.heading !== undefined || (node.children && node.children.length > 0)
+    : 'children' in node && node.children && node.children.length > 0;
 
   const nodePath = currentPath; // Use the passed currentPath directly
 
@@ -247,7 +251,9 @@ function TreeNode({
 
         {/* Node content */}
         <div className="flex-1 min-w-0 overflow-hidden">
-          <span className={`text-sm ${isSelected ? 'font-semibold' : 'font-normal'} ${colorClass} block overflow-hidden text-ellipsis whitespace-nowrap`}>
+          <span
+            className={`text-sm ${isSelected ? 'font-semibold' : 'font-normal'} ${colorClass} block overflow-hidden text-ellipsis whitespace-nowrap`}
+          >
             {getNodeLabel()}
           </span>
         </div>
@@ -291,7 +297,9 @@ function TreeNode({
               })}
             </>
           ) : (
-            'children' in node && node.children && node.children.map((child, index) => {
+            'children' in node &&
+            node.children &&
+            node.children.map((child, index) => {
               const childPath = `${nodePath}-${index}`;
               return (
                 <TreeNode
@@ -326,11 +334,13 @@ export default function InputWithAST({
     start: number;
     end: number;
   } | null>(null);
-  const [selectedPositions, setSelectedPositions] = useState<Array<{
-    start: number;
-    end: number;
-    path: string;
-  }>>([]);
+  const [selectedPositions, setSelectedPositions] = useState<
+    Array<{
+      start: number;
+      end: number;
+      path: string;
+    }>
+  >([]);
   const [lastSelectedPath, setLastSelectedPath] = useState<string | null>(null);
 
   // Parse the markdown text to AST
@@ -359,16 +369,16 @@ export default function InputWithAST({
   const handleNodeClick = (
     position: { start: number; end: number } | null,
     path: string,
-    event: React.MouseEvent
+    event: React.MouseEvent,
   ) => {
     if (!position) return;
 
     if (event.shiftKey) {
       // Add to selection or remove if already selected
-      setSelectedPositions(prev => {
-        const exists = prev.some(p => p.path === path);
+      setSelectedPositions((prev) => {
+        const exists = prev.some((p) => p.path === path);
         if (exists) {
-          return prev.filter(p => p.path !== path);
+          return prev.filter((p) => p.path !== path);
         } else {
           return [...prev, { ...position, path }];
         }
@@ -389,11 +399,12 @@ export default function InputWithAST({
 
     // Only add hover position if it doesn't overlap with any selection
     if (hoveredPosition) {
-      const hoverOverlapsSelection = selectedPositions.some(p =>
-        // Check if hover overlaps with any selected region
-        (hoveredPosition.start >= p.start && hoveredPosition.start < p.end) ||
-        (hoveredPosition.end > p.start && hoveredPosition.end <= p.end) ||
-        (hoveredPosition.start <= p.start && hoveredPosition.end >= p.end)
+      const hoverOverlapsSelection = selectedPositions.some(
+        (p) =>
+          // Check if hover overlaps with any selected region
+          (hoveredPosition.start >= p.start && hoveredPosition.start < p.end) ||
+          (hoveredPosition.end > p.start && hoveredPosition.end <= p.end) ||
+          (hoveredPosition.start <= p.start && hoveredPosition.end >= p.end),
       );
 
       if (!hoverOverlapsSelection) {
@@ -406,10 +417,14 @@ export default function InputWithAST({
     }
 
     // Merge overlapping positions
-    const mergedPositions: Array<{start: number; end: number; isHover: boolean}> = [];
+    const mergedPositions: Array<{
+      start: number;
+      end: number;
+      isHover: boolean;
+    }> = [];
     const sortedPositions = [...positions].sort((a, b) => a.start - b.start);
 
-    sortedPositions.forEach(pos => {
+    sortedPositions.forEach((pos) => {
       const isHover = pos.path === 'hover';
       if (mergedPositions.length === 0) {
         mergedPositions.push({ start: pos.start, end: pos.end, isHover });
@@ -430,7 +445,7 @@ export default function InputWithAST({
     });
 
     // Build text with highlights
-    let result = [];
+    const result = [];
     let lastEnd = 0;
 
     mergedPositions.forEach((pos, index) => {
@@ -442,13 +457,13 @@ export default function InputWithAST({
       // Skip if this position starts before lastEnd (shouldn't happen after merging, but safety check)
       if (pos.start >= lastEnd) {
         const className = pos.isHover
-          ? "bg-blue-200 dark:bg-blue-600/50 text-black dark:text-white"
-          : "bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white";
+          ? 'bg-blue-200 dark:bg-blue-600/50 text-black dark:text-white'
+          : 'bg-yellow-200 dark:bg-yellow-600/50 text-black dark:text-white';
 
         result.push(
           <mark key={`highlight-${index}`} className={className}>
             {text.substring(pos.start, pos.end)}
-          </mark>
+          </mark>,
         );
 
         lastEnd = pos.end;
@@ -478,7 +493,9 @@ export default function InputWithAST({
         {/* Markdown Header */}
         <div className="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">Markdown</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              Markdown
+            </span>
           </div>
           <div className="flex items-center gap-2">
             {/* Invisible button for height consistency */}
@@ -488,8 +505,18 @@ export default function InputWithAST({
               className="px-2 py-1 text-xs font-medium opacity-0 pointer-events-none border border-transparent rounded flex items-center gap-1"
             >
               0 selected
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -501,11 +528,13 @@ export default function InputWithAST({
           <div
             className="flex-1 p-3 overflow-auto bg-white dark:bg-gray-800 font-mono text-sm text-black dark:text-white cursor-pointer"
             onClick={hasSelection ? handleClearSelection : undefined}
-            title={hasSelection ? "Click to clear selection and edit" : undefined}
+            title={
+              hasSelection ? 'Click to clear selection and edit' : undefined
+            }
             style={{
               wordBreak: 'break-all',
               overflowWrap: 'break-word',
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
             }}
           >
             {renderTextWithHighlight()}
@@ -521,7 +550,7 @@ export default function InputWithAST({
             style={{
               wordBreak: 'break-all',
               overflowWrap: 'break-word',
-              whiteSpace: 'pre-wrap'
+              whiteSpace: 'pre-wrap',
             }}
           />
         )}
@@ -532,13 +561,19 @@ export default function InputWithAST({
         {/* AST Header */}
         <div className="flex items-center justify-between px-2 py-2 bg-white dark:bg-gray-800 border-b border-gray-300 dark:border-gray-600 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">AST</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              AST
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleClearSelection}
               type="button"
-              title={hasSelection ? "Clear all selections and return to edit mode" : "No selections"}
+              title={
+                hasSelection
+                  ? 'Clear all selections and return to edit mode'
+                  : 'No selections'
+              }
               disabled={!hasSelection}
               className={`px-2 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600 rounded transition-colors flex items-center gap-1 ${
                 hasSelection
@@ -547,8 +582,18 @@ export default function InputWithAST({
               }`}
             >
               {selectedPositions.length} selected
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -567,7 +612,7 @@ export default function InputWithAST({
               collapseAll={collapseAll}
               onNodeHover={handleNodeHover}
               onNodeClick={handleNodeClick}
-              selectedNodePaths={selectedPositions.map(p => p.path)}
+              selectedNodePaths={selectedPositions.map((p) => p.path)}
               currentPath="/root"
             />
           ) : (

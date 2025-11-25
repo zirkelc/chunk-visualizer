@@ -5,10 +5,10 @@ import {
 } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown, gfmToMarkdown } from 'mdast-util-gfm';
 import { toMarkdown as mdastToMarkdown } from 'mdast-util-to-markdown';
+import { toString as mdastToString } from 'mdast-util-to-string';
 import { gfm } from 'micromark-extension-gfm';
-import { toString } from 'mdast-util-to-string';
 
-export { toString } from 'mdast-util-to-string';
+export { mdastToString as toString };
 
 export const fromMarkdown = (value: Value) => {
   return mdastFromMarkdown(value, {
@@ -24,6 +24,6 @@ export const toMarkdown = (tree: Nodes) => {
 };
 
 export const getContentSize = (input: Nodes): number => {
-  const plainText = toString(input);
+  const plainText = mdastToString(input);
   return plainText.length;
 };

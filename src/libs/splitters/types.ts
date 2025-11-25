@@ -49,7 +49,10 @@ export interface TextSplitter {
    * @param config Configuration options
    * @returns Array of text chunks
    */
-  splitText(text: string, config: TextSplitterConfig): Promise<string[]> | string[];
+  splitText(
+    text: string,
+    config: TextSplitterConfig,
+  ): Promise<string[]> | string[];
 
   /**
    * Get all configuration options for a specific algorithm for UI rendering

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import ChunkVisualizer from './ChunkVisualizer';
-import { splitterRegistry } from '../libs/splitters/registry';
-import type { TextSplitterConfig } from '../libs/splitters/types';
+import { useEffect, useState } from 'react';
 import { useTextSplitter } from '../hooks/useTextSplitter';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
+import { splitterRegistry } from '../libs/splitters/registry';
+import type { TextSplitterConfig } from '../libs/splitters/types';
+import ChunkVisualizer from './ChunkVisualizer';
 
 interface Stats {
   inputCharacters: number;
@@ -30,7 +30,10 @@ interface ChunkVisualizerWithOptionsProps {
   onAlgorithmChange: (algorithm: string) => void;
   onConfigChange: (config: Partial<TextSplitterConfig>) => void;
   availableAlgorithms: readonly string[];
-  onTooltipMouseEnter?: (e: React.MouseEvent<HTMLDivElement>, text: string) => void;
+  onTooltipMouseEnter?: (
+    e: React.MouseEvent<HTMLDivElement>,
+    text: string,
+  ) => void;
   onTooltipMouseLeave?: () => void;
 }
 
@@ -46,7 +49,9 @@ export function ChunkVisualizerWithOptions({
   onTooltipMouseEnter,
   onTooltipMouseLeave,
 }: ChunkVisualizerWithOptionsProps) {
-  const [viewMode, setViewMode] = useState<'options' | 'stats' | 'none'>('options');
+  const [viewMode, setViewMode] = useState<'options' | 'stats' | 'none'>(
+    'options',
+  );
   const splitter = splitterRegistry.get(splitterId);
   const libraryName = splitter?.name || splitterId;
 
@@ -94,26 +99,31 @@ export function ChunkVisualizerWithOptions({
     const inputAst = fromMarkdown(text);
     const inputCharacters = text.length;
     const inputContentLength = getContentSize(inputAst);
-    const outputCharacters = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const outputCharacters = chunks.reduce(
+      (sum, chunk) => sum + chunk.length,
+      0,
+    );
     const outputContentLength = chunks.reduce((sum, chunk) => {
       const chunkAst = fromMarkdown(chunk);
       return sum + getContentSize(chunkAst);
     }, 0);
     const numberOfChunks = chunks.length;
 
-    const chunkSizes = chunks.map(c => c.length);
-    const contentSizes = chunks.map(c => {
+    const chunkSizes = chunks.map((c) => c.length);
+    const contentSizes = chunks.map((c) => {
       const chunkAst = fromMarkdown(c);
       return getContentSize(chunkAst);
     });
 
     const minChunkSize = numberOfChunks > 0 ? Math.min(...chunkSizes) : 0;
     const maxChunkSize = numberOfChunks > 0 ? Math.max(...chunkSizes) : 0;
-    const avgChunkSize = numberOfChunks > 0 ? Math.round(outputCharacters / numberOfChunks) : 0;
+    const avgChunkSize =
+      numberOfChunks > 0 ? Math.round(outputCharacters / numberOfChunks) : 0;
 
     const minContentSize = numberOfChunks > 0 ? Math.min(...contentSizes) : 0;
     const maxContentSize = numberOfChunks > 0 ? Math.max(...contentSizes) : 0;
-    const avgContentSize = numberOfChunks > 0 ? Math.round(outputContentLength / numberOfChunks) : 0;
+    const avgContentSize =
+      numberOfChunks > 0 ? Math.round(outputContentLength / numberOfChunks) : 0;
 
     setStats({
       inputCharacters,
@@ -137,7 +147,9 @@ export function ChunkVisualizerWithOptions({
         <div className="flex items-center gap-2">
           {/* Library Button */}
           <button
-            onClick={() => setViewMode(viewMode === 'options' ? 'none' : 'options')}
+            onClick={() =>
+              setViewMode(viewMode === 'options' ? 'none' : 'options')
+            }
             type="button"
             className={`flex items-center gap-1 px-2 py-1 text-xs font-medium rounded transition-colors border ${
               viewMode === 'options'
@@ -146,9 +158,24 @@ export function ChunkVisualizerWithOptions({
             }`}
             title="Show library options"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
             </svg>
             <span>{libraryName}</span>
           </button>
@@ -164,8 +191,18 @@ export function ChunkVisualizerWithOptions({
             }`}
             title="Show statistics"
           >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            <svg
+              className="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
             </svg>
             <span>Stats</span>
           </button>
@@ -178,11 +215,26 @@ export function ChunkVisualizerWithOptions({
           className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
           title={viewMode === 'none' ? 'Expand' : 'Minimize'}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             {viewMode === 'none' ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 12H4"
+              />
             )}
           </svg>
         </button>
@@ -206,7 +258,8 @@ export function ChunkVisualizerWithOptions({
                 >
                   {splitterRegistry.getAll().map((s) => (
                     <option key={s.id} value={s.id} disabled={s.disabled}>
-                      {s.name} v{s.version}{s.disabled ? ' (disabled)' : ''}
+                      {s.name} v{s.version}
+                      {s.disabled ? ' (disabled)' : ''}
                     </option>
                   ))}
                 </select>
@@ -231,131 +284,142 @@ export function ChunkVisualizerWithOptions({
               </div>
 
               {/* Dynamic Configuration Options */}
-              {(splitter?.getAlgorithmConfig?.(algorithm) || []).map((option) => (
-                <div key={option.key}>
-                  {option.type === 'range' && (
-                    <>
-                      <label
-                        htmlFor={option.key}
-                        className="block text-sm font-medium mb-1 text-black dark:text-white"
-                      >
-                        {option.label}: {config[option.key] ?? option.defaultValue}
-                      </label>
-                      <div className="flex items-center gap-2 mb-2">
+              {(splitter?.getAlgorithmConfig?.(algorithm) || []).map(
+                (option) => (
+                  <div key={option.key}>
+                    {option.type === 'range' && (
+                      <>
+                        <label
+                          htmlFor={option.key}
+                          className="block text-sm font-medium mb-1 text-black dark:text-white"
+                        >
+                          {option.label}:{' '}
+                          {config[option.key] ?? option.defaultValue}
+                        </label>
+                        <div className="flex items-center gap-2 mb-2">
+                          <input
+                            id={option.key}
+                            type="range"
+                            min={option.min}
+                            max={option.max}
+                            step={option.step}
+                            value={config[option.key] ?? option.defaultValue}
+                            onChange={(e) =>
+                              onConfigChange({
+                                [option.key]: Number(e.target.value),
+                              })
+                            }
+                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                          />
+                          <input
+                            type="number"
+                            min={option.min}
+                            max={option.max}
+                            step={option.step}
+                            value={config[option.key] ?? option.defaultValue}
+                            onChange={(e) =>
+                              onConfigChange({
+                                [option.key]: Number(e.target.value),
+                              })
+                            }
+                            className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                          <span>{option.min}</span>
+                          <span>{option.max}</span>
+                        </div>
+                        {option.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {option.description}
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {option.type === 'number' && (
+                      <>
+                        <label
+                          htmlFor={option.key}
+                          className="block text-sm font-medium mb-1 text-black dark:text-white"
+                        >
+                          {option.label}
+                        </label>
                         <input
                           id={option.key}
-                          type="range"
-                          min={option.min}
-                          max={option.max}
-                          step={option.step}
-                          value={config[option.key] ?? option.defaultValue}
-                          onChange={(e) =>
-                            onConfigChange({ [option.key]: Number(e.target.value) })
-                          }
-                          className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                        />
-                        <input
                           type="number"
                           min={option.min}
                           max={option.max}
                           step={option.step}
                           value={config[option.key] ?? option.defaultValue}
                           onChange={(e) =>
-                            onConfigChange({ [option.key]: Number(e.target.value) })
+                            onConfigChange({
+                              [option.key]: Number(e.target.value),
+                            })
                           }
-                          className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
                         />
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                        <span>{option.min}</span>
-                        <span>{option.max}</span>
-                      </div>
-                      {option.description && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {option.description}
-                        </p>
-                      )}
-                    </>
-                  )}
+                        {option.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {option.description}
+                          </p>
+                        )}
+                      </>
+                    )}
 
-                  {option.type === 'number' && (
-                    <>
-                      <label
-                        htmlFor={option.key}
-                        className="block text-sm font-medium mb-1 text-black dark:text-white"
-                      >
-                        {option.label}
-                      </label>
-                      <input
-                        id={option.key}
-                        type="number"
-                        min={option.min}
-                        max={option.max}
-                        step={option.step}
-                        value={config[option.key] ?? option.defaultValue}
-                        onChange={(e) =>
-                          onConfigChange({ [option.key]: Number(e.target.value) })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                      />
-                      {option.description && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {option.description}
-                        </p>
-                      )}
-                    </>
-                  )}
-
-                  {option.type === 'boolean' && (
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={config[option.key] ?? option.defaultValue}
-                        onChange={(e) =>
-                          onConfigChange({ [option.key]: e.target.checked })
-                        }
-                        className="rounded border-gray-300 dark:border-gray-600"
-                      />
-                      <span className="text-sm text-black dark:text-white">
-                        {option.label}
-                      </span>
-                      {option.description && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          ({option.description})
+                    {option.type === 'boolean' && (
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={config[option.key] ?? option.defaultValue}
+                          onChange={(e) =>
+                            onConfigChange({ [option.key]: e.target.checked })
+                          }
+                          className="rounded border-gray-300 dark:border-gray-600"
+                        />
+                        <span className="text-sm text-black dark:text-white">
+                          {option.label}
                         </span>
-                      )}
-                    </label>
-                  )}
-
-                  {option.type === 'select' && option.options && (
-                    <>
-                      <label
-                        htmlFor={option.key}
-                        className="block text-sm font-medium mb-1 text-black dark:text-white"
-                      >
-                        {option.label}
+                        {option.description && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                            ({option.description})
+                          </span>
+                        )}
                       </label>
-                      <select
-                        id={option.key}
-                        value={config[option.key] ?? option.defaultValue}
-                        onChange={(e) => onConfigChange({ [option.key]: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
-                      >
-                        {option.options.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                      {option.description && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {option.description}
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
+                    )}
+
+                    {option.type === 'select' && option.options && (
+                      <>
+                        <label
+                          htmlFor={option.key}
+                          className="block text-sm font-medium mb-1 text-black dark:text-white"
+                        >
+                          {option.label}
+                        </label>
+                        <select
+                          id={option.key}
+                          value={config[option.key] ?? option.defaultValue}
+                          onChange={(e) =>
+                            onConfigChange({ [option.key]: e.target.value })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
+                        >
+                          {option.options.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        {option.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {option.description}
+                          </p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ),
+              )}
             </div>
 
             {/* Horizontal Rule Separator */}

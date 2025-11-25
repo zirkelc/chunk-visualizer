@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import ChunkVisualizer from '../components/ChunkVisualizer';
 import { ChunkVisualizerWithOptions } from '../components/ChunkVisualizerWithOptions';
-import InputWithAST from '../components/InputWithAST';
 import { Container } from '../components/Container';
+import InputWithAST from '../components/InputWithAST';
 import Toast from '../components/Toast';
 import { fromMarkdown, getContentSize } from '../libs/markdown';
 import { splitterRegistry } from '../libs/splitters/registry';
@@ -95,9 +95,11 @@ function HomeContent() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [layoutMode, setLayoutMode] = useState<'column' | 'row'>('column');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  
+
   // Comparison panels state
-  const [comparisonPanels, setComparisonPanels] = useState<ComparisonPanel[]>([]);
+  const [comparisonPanels, setComparisonPanels] = useState<ComparisonPanel[]>(
+    [],
+  );
 
   // Section collapse states
   const [inputCollapsed, setInputCollapsed] = useState(false);
@@ -109,7 +111,10 @@ function HomeContent() {
 
   // Section order state - now includes comparison panels
   type SectionId = 'input' | 'chunks' | string; // string for panel IDs
-  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(['input', 'chunks']);
+  const [sectionOrder, setSectionOrder] = useState<SectionId[]>([
+    'input',
+    'chunks',
+  ]);
 
   // Chunks and statistics state
   const [chunks, setChunks] = useState<string[]>([]);
@@ -155,7 +160,12 @@ function HomeContent() {
 
     // Load library
     const libParam = params.get('library');
-    if (libParam && (libParam === 'chunkdown' || libParam === 'langchain' || libParam === 'mastra')) {
+    if (
+      libParam &&
+      (libParam === 'chunkdown' ||
+        libParam === 'langchain' ||
+        libParam === 'mastra')
+    ) {
       setLibrary(libParam);
     }
 
@@ -207,9 +217,11 @@ function HomeContent() {
     if (orderParam) {
       const order = orderParam.split(',') as SectionId[];
       // Validate order contains at least input and chunks
-      if (order.length >= 2 &&
-          order.includes('input') &&
-          order.includes('chunks')) {
+      if (
+        order.length >= 2 &&
+        order.includes('input') &&
+        order.includes('chunks')
+      ) {
         setSectionOrder(order);
       }
     }
@@ -242,13 +254,19 @@ function HomeContent() {
     const comparisonData = params.get('comparison');
     if (comparisonData) {
       try {
-        const panels = JSON.parse(decodeURIComponent(comparisonData)) as ComparisonPanel[];
+        const panels = JSON.parse(
+          decodeURIComponent(comparisonData),
+        ) as ComparisonPanel[];
         setComparisonPanels(panels);
-        
+
         // Add panel IDs to section order if not already present (for backward compatibility)
-        const loadedOrder = orderParam ? orderParam.split(',') as SectionId[] : ['input', 'chunks'];
-        const panelIds = panels.map(p => p.id);
-        const missingPanelIds = panelIds.filter(id => !loadedOrder.includes(id));
+        const loadedOrder = orderParam
+          ? (orderParam.split(',') as SectionId[])
+          : ['input', 'chunks'];
+        const panelIds = panels.map((p) => p.id);
+        const missingPanelIds = panelIds.filter(
+          (id) => !loadedOrder.includes(id),
+        );
         if (missingPanelIds.length > 0) {
           setSectionOrder([...loadedOrder, ...missingPanelIds]);
         }
@@ -256,8 +274,6 @@ function HomeContent() {
         console.error('Failed to parse comparison panels:', e);
       }
     }
-
-
 
     setIsInitialized(true);
   }, [searchParams]);
@@ -301,9 +317,12 @@ function HomeContent() {
           throw new Error(`Splitter not found: ${library}`);
         }
 
-        const algorithm = library === 'chunkdown' ? chunkdownAlgorithm :
-                        library === 'mastra' ? mastraAlgorithm :
-                        langchainAlgorithm;
+        const algorithm =
+          library === 'chunkdown'
+            ? chunkdownAlgorithm
+            : library === 'mastra'
+              ? mastraAlgorithm
+              : langchainAlgorithm;
 
         const config: TextSplitterConfig = {
           chunkSize,
@@ -320,26 +339,37 @@ function HomeContent() {
         const inputAst = fromMarkdown(text);
         const inputCharacters = text.length;
         const inputContentLength = getContentSize(inputAst);
-        const outputCharacters = resultChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const outputCharacters = resultChunks.reduce(
+          (sum, chunk) => sum + chunk.length,
+          0,
+        );
         const outputContentLength = resultChunks.reduce((sum, chunk) => {
           const chunkAst = fromMarkdown(chunk);
           return sum + getContentSize(chunkAst);
         }, 0);
         const numberOfChunks = resultChunks.length;
 
-        const chunkSizes = resultChunks.map(c => c.length);
-        const contentSizes = resultChunks.map(c => {
+        const chunkSizes = resultChunks.map((c) => c.length);
+        const contentSizes = resultChunks.map((c) => {
           const chunkAst = fromMarkdown(c);
           return getContentSize(chunkAst);
         });
 
         const minChunkSize = numberOfChunks > 0 ? Math.min(...chunkSizes) : 0;
         const maxChunkSize = numberOfChunks > 0 ? Math.max(...chunkSizes) : 0;
-        const avgChunkSize = numberOfChunks > 0 ? Math.round(outputCharacters / numberOfChunks) : 0;
+        const avgChunkSize =
+          numberOfChunks > 0
+            ? Math.round(outputCharacters / numberOfChunks)
+            : 0;
 
-        const minContentSize = numberOfChunks > 0 ? Math.min(...contentSizes) : 0;
-        const maxContentSize = numberOfChunks > 0 ? Math.max(...contentSizes) : 0;
-        const avgContentSize = numberOfChunks > 0 ? Math.round(outputContentLength / numberOfChunks) : 0;
+        const minContentSize =
+          numberOfChunks > 0 ? Math.min(...contentSizes) : 0;
+        const maxContentSize =
+          numberOfChunks > 0 ? Math.max(...contentSizes) : 0;
+        const avgContentSize =
+          numberOfChunks > 0
+            ? Math.round(outputContentLength / numberOfChunks)
+            : 0;
 
         setStats({
           inputCharacters,
@@ -361,7 +391,14 @@ function HomeContent() {
     };
 
     splitText();
-  }, [text, library, chunkSize, maxOverflowRatio, langchainAlgorithm, mastraAlgorithm]);
+  }, [
+    text,
+    library,
+    chunkSize,
+    maxOverflowRatio,
+    langchainAlgorithm,
+    mastraAlgorithm,
+  ]);
 
   // Update URL when state changes
   const updateURL = useCallback(() => {
@@ -449,7 +486,10 @@ function HomeContent() {
 
     // Store comparison panels
     if (comparisonPanels.length > 0) {
-      params.set('comparison', encodeURIComponent(JSON.stringify(comparisonPanels)));
+      params.set(
+        'comparison',
+        encodeURIComponent(JSON.stringify(comparisonPanels)),
+      );
     }
 
     const newUrl = params.toString() ? `?${params.toString()}` : '/';
@@ -561,7 +601,10 @@ function HomeContent() {
     if (newIndex < 0 || newIndex >= sectionOrder.length) return;
 
     const newOrder = [...sectionOrder];
-    [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+    [newOrder[currentIndex], newOrder[newIndex]] = [
+      newOrder[newIndex],
+      newOrder[currentIndex],
+    ];
     setSectionOrder(newOrder);
   };
 
@@ -597,10 +640,18 @@ function HomeContent() {
   // Comparison panel management
   const addComparisonPanel = () => {
     // Find next available library that's not in use
-    const availableLibraries = splitterRegistry.getAll().filter(s => !s.disabled).map(s => s.id as Library);
-    const usedLibraries = new Set([library, ...comparisonPanels.map(p => p.library)]);
-    const nextLibrary = availableLibraries.find(lib => !usedLibraries.has(lib)) || availableLibraries[0];
-    
+    const availableLibraries = splitterRegistry
+      .getAll()
+      .filter((s) => !s.disabled)
+      .map((s) => s.id as Library);
+    const usedLibraries = new Set([
+      library,
+      ...comparisonPanels.map((p) => p.library),
+    ]);
+    const nextLibrary =
+      availableLibraries.find((lib) => !usedLibraries.has(lib)) ||
+      availableLibraries[0];
+
     const newPanel: ComparisonPanel = {
       id: `panel-${Date.now()}`,
       library: nextLibrary,
@@ -610,25 +661,28 @@ function HomeContent() {
       chunkSize: 200,
       maxOverflowRatio: 1.5,
     };
-    
+
     setComparisonPanels([...comparisonPanels, newPanel]);
     // Add to section order at the end
     setSectionOrder([...sectionOrder, newPanel.id]);
   };
-  
+
   const removeComparisonPanel = (panelId: string) => {
-    setComparisonPanels(comparisonPanels.filter(p => p.id !== panelId));
+    setComparisonPanels(comparisonPanels.filter((p) => p.id !== panelId));
     // Remove from section order
-    setSectionOrder(sectionOrder.filter(id => id !== panelId));
-  };
-  
-  const updateComparisonPanel = (panelId: string, updates: Partial<ComparisonPanel>) => {
-    setComparisonPanels(comparisonPanels.map(p => 
-      p.id === panelId ? { ...p, ...updates } : p
-    ));
+    setSectionOrder(sectionOrder.filter((id) => id !== panelId));
   };
 
-
+  const updateComparisonPanel = (
+    panelId: string,
+    updates: Partial<ComparisonPanel>,
+  ) => {
+    setComparisonPanels(
+      comparisonPanels.map((p) =>
+        p.id === panelId ? { ...p, ...updates } : p,
+      ),
+    );
+  };
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 font-mono flex flex-col h-screen overflow-hidden">
@@ -651,8 +705,18 @@ function HomeContent() {
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 </button>
                 <button
@@ -665,8 +729,18 @@ function HomeContent() {
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 4v16M15 4v16" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 4v16M15 4v16"
+                    />
                   </svg>
                 </button>
               </div>
@@ -681,12 +755,32 @@ function HomeContent() {
                   className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                 >
                   {theme === 'light' ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
                     </svg>
                   )}
                 </button>
@@ -752,8 +846,18 @@ function HomeContent() {
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
                   </svg>
                 </button>
                 <button
@@ -766,13 +870,21 @@ function HomeContent() {
                       : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 4v16M15 4v16" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 4v16M15 4v16"
+                    />
                   </svg>
                 </button>
               </div>
-
-
             </div>
 
             {/* Center: Title (hidden on mobile, shown inline on large screens) */}
@@ -793,20 +905,39 @@ function HomeContent() {
               >
                 {theme === 'light' ? (
                   <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
                     </svg>
                     <span className="text-sm font-medium">Light</span>
                   </>
-                  ) : (
+                ) : (
                   <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <span className="text-sm font-medium">Dark</span>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
+                    </svg>
+                    <span className="text-sm font-medium">Dark</span>
                   </>
                 )}
-
               </button>
 
               {/* Theme Toggle Icon Only (mobile) */}
@@ -818,18 +949,37 @@ function HomeContent() {
               >
                 {theme === 'light' ? (
                   <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
                     </svg>
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
                     </svg>
                   </>
                 )}
-
               </button>
 
               {/* GitHub Button */}
@@ -932,162 +1082,241 @@ function HomeContent() {
               Chunk Visualizer
             </h1>
             <p className="text-sm text-black dark:text-gray-300">
-              Visual comparison of text chunking algorithms from various libraries.
+              Visual comparison of text chunking algorithms from various
+              libraries.
             </p>
             <p className="text-sm text-black dark:text-gray-300">
-              Missing a library? Send a pull request to <a href="https://github.com/zirkelc/chunk-visualizer" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">GitHub</a>.
+              Missing a library? Send a pull request to{' '}
+              <a
+                href="https://github.com/zirkelc/chunk-visualizer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                GitHub
+              </a>
+              .
             </p>
           </div>
 
           {/* Description (large screens only - below inline header) */}
           <div className="hidden lg:block text-center mb-4">
             <p className="text-sm text-black dark:text-gray-300">
-              Visual comparison of text chunking algorithms from various libraries.
+              Visual comparison of text chunking algorithms from various
+              libraries.
             </p>
             <p className="text-sm text-black dark:text-gray-300">
-              Missing a library? Send a pull request to <a href="https://github.com/zirkelc/chunk-visualizer" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">GitHub</a>.
+              Missing a library? Send a pull request to{' '}
+              <a
+                href="https://github.com/zirkelc/chunk-visualizer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                GitHub
+              </a>
+              .
             </p>
           </div>
         </div>
 
         {/* Main Content - Toggle between Column and Row Layout */}
-        <div className={layoutMode === 'column' ?
-          'flex gap-4 flex-1 min-h-0 overflow-hidden'
-          : 'flex-1 min-h-0 overflow-hidden'}>
-          <div className={layoutMode === 'row' ? 'flex flex-col gap-4 h-full overflow-y-auto' : layoutMode === 'column' ? 'flex gap-4 flex-1 min-h-0 overflow-x-auto w-full' : 'contents'}>
-          {/* Input */}
+        <div
+          className={
+            layoutMode === 'column'
+              ? 'flex gap-4 flex-1 min-h-0 overflow-hidden'
+              : 'flex-1 min-h-0 overflow-hidden'
+          }
+        >
           <div
-            className={layoutMode === 'column' && !inputCollapsed ?
-              'flex-1 min-w-[400px] min-h-0 overflow-hidden'
-              : layoutMode === 'row' && !inputCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
-            style={{ order: getSectionOrder('input') }}
+            className={
+              layoutMode === 'row'
+                ? 'flex flex-col gap-4 h-full overflow-y-auto'
+                : layoutMode === 'column'
+                  ? 'flex gap-4 flex-1 min-h-0 overflow-x-auto w-full'
+                  : 'contents'
+            }
           >
-            <Container
-              label="Input"
-              layoutMode={layoutMode}
-              collapsed={inputCollapsed}
-              onToggleCollapse={() => setInputCollapsed(!inputCollapsed)}
-              onMoveLeft={() => moveSection('input', 'left')}
-              onMoveRight={() => moveSection('input', 'right')}
-              canMoveLeft={canMove('input', 'left')}
-              canMoveRight={canMove('input', 'right')}
-            >
-              <InputWithAST
-                text={text}
-                onTextChange={setText}
-                collapseAll={astCollapsed}
-              />
-            </Container>
-          </div>
-
-          {/* Chunks */}
-          <div
-            className={layoutMode === 'column' && !chunksCollapsed ?
-              'flex-1 min-w-[400px] min-h-0 overflow-hidden'
-              : layoutMode === 'row' && !chunksCollapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
-            style={{ order: getSectionOrder('chunks') }}
-          >
-            <Container
-              label="Chunks #1"
-              layoutMode={layoutMode}
-              collapsed={chunksCollapsed}
-              onToggleCollapse={() => setChunksCollapsed(!chunksCollapsed)}
-              onMoveLeft={() => moveSection('chunks', 'left')}
-              onMoveRight={() => moveSection('chunks', 'right')}
-              canMoveLeft={canMove('chunks', 'left')}
-              canMoveRight={canMove('chunks', 'right')}
-              additionalActionButton={
-                <button
-                  onClick={addComparisonPanel}
-                  type="button"
-                  title="Add library for comparison"
-                  className="px-2 py-1 text-xs font-medium bg-transparent text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-700 dark:hover:border-green-300 rounded transition-colors flex items-center gap-1"
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Compare
-                </button>
+            {/* Input */}
+            <div
+              className={
+                layoutMode === 'column' && !inputCollapsed
+                  ? 'flex-1 min-w-[400px] min-h-0 overflow-hidden'
+                  : layoutMode === 'row' && !inputCollapsed
+                    ? 'flex-1 min-h-[400px] overflow-hidden'
+                    : ''
               }
+              style={{ order: getSectionOrder('input') }}
             >
-              <ChunkVisualizerWithOptions
-                text={text}
-                splitterId={library}
-                algorithm={getCurrentAlgorithm()}
-                config={{
-                  chunkSize,
-                  chunkOverlap: 0,
-                  maxOverflowRatio,
-                }}
-                onLibraryChange={(lib) => handleLibraryChange(lib as Library)}
-                onAlgorithmChange={handleAlgorithmChange}
-                onConfigChange={(updates) => {
-                  if (updates.chunkSize !== undefined) setChunkSize(updates.chunkSize);
-                  if (updates.maxOverflowRatio !== undefined) setMaxOverflowRatio(updates.maxOverflowRatio);
-                }}
-                availableAlgorithms={getAvailableAlgorithms()}
-                onTooltipMouseEnter={handleTooltipMouseEnter}
-                onTooltipMouseLeave={handleTooltipMouseLeave}
-              />
-            </Container>
-          </div>
-
-          {/* Comparison Panels - using same Container component */}
-          {comparisonPanels.map((panel, index) => {
-            const panelAlgorithm = panel.library === 'chunkdown' ? panel.chunkdownAlgorithm :
-                                   panel.library === 'mastra' ? panel.mastraAlgorithm :
-                                   panel.langchainAlgorithm;
-            
-            return (
-              <div
-                key={panel.id}
-                className={layoutMode === 'column' && !panel.collapsed ?
-                  'flex-1 min-w-[400px] min-h-0 overflow-hidden'
-                  : layoutMode === 'row' && !panel.collapsed ? 'flex-1 min-h-[400px] overflow-hidden' : ''}
-                style={{ order: getSectionOrder(panel.id) }}
+              <Container
+                label="Input"
+                layoutMode={layoutMode}
+                collapsed={inputCollapsed}
+                onToggleCollapse={() => setInputCollapsed(!inputCollapsed)}
+                onMoveLeft={() => moveSection('input', 'left')}
+                onMoveRight={() => moveSection('input', 'right')}
+                canMoveLeft={canMove('input', 'left')}
+                canMoveRight={canMove('input', 'right')}
               >
-                <Container
-                  label={`Chunks #${index + 2}`}
-                  layoutMode={layoutMode}
-                  collapsed={panel.collapsed || false}
-                  onToggleCollapse={() => updateComparisonPanel(panel.id, { collapsed: !panel.collapsed })}
-                  onMoveLeft={() => moveSection(panel.id as SectionId, 'left')}
-                  onMoveRight={() => moveSection(panel.id as SectionId, 'right')}
-                  canMoveLeft={canMove(panel.id as SectionId, 'left')}
-                  canMoveRight={canMove(panel.id as SectionId, 'right')}
-                  showCloseButton={true}
-                  onClose={() => removeComparisonPanel(panel.id)}
+                <InputWithAST
+                  text={text}
+                  onTextChange={setText}
+                  collapseAll={astCollapsed}
+                />
+              </Container>
+            </div>
+
+            {/* Chunks */}
+            <div
+              className={
+                layoutMode === 'column' && !chunksCollapsed
+                  ? 'flex-1 min-w-[400px] min-h-0 overflow-hidden'
+                  : layoutMode === 'row' && !chunksCollapsed
+                    ? 'flex-1 min-h-[400px] overflow-hidden'
+                    : ''
+              }
+              style={{ order: getSectionOrder('chunks') }}
+            >
+              <Container
+                label="Chunks #1"
+                layoutMode={layoutMode}
+                collapsed={chunksCollapsed}
+                onToggleCollapse={() => setChunksCollapsed(!chunksCollapsed)}
+                onMoveLeft={() => moveSection('chunks', 'left')}
+                onMoveRight={() => moveSection('chunks', 'right')}
+                canMoveLeft={canMove('chunks', 'left')}
+                canMoveRight={canMove('chunks', 'right')}
+                additionalActionButton={
+                  <button
+                    onClick={addComparisonPanel}
+                    type="button"
+                    title="Add library for comparison"
+                    className="px-2 py-1 text-xs font-medium bg-transparent text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-700 dark:hover:border-green-300 rounded transition-colors flex items-center gap-1"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Compare
+                  </button>
+                }
+              >
+                <ChunkVisualizerWithOptions
+                  text={text}
+                  splitterId={library}
+                  algorithm={getCurrentAlgorithm()}
+                  config={{
+                    chunkSize,
+                    chunkOverlap: 0,
+                    maxOverflowRatio,
+                  }}
+                  onLibraryChange={(lib) => handleLibraryChange(lib as Library)}
+                  onAlgorithmChange={handleAlgorithmChange}
+                  onConfigChange={(updates) => {
+                    if (updates.chunkSize !== undefined)
+                      setChunkSize(updates.chunkSize);
+                    if (updates.maxOverflowRatio !== undefined)
+                      setMaxOverflowRatio(updates.maxOverflowRatio);
+                  }}
+                  availableAlgorithms={getAvailableAlgorithms()}
+                  onTooltipMouseEnter={handleTooltipMouseEnter}
+                  onTooltipMouseLeave={handleTooltipMouseLeave}
+                />
+              </Container>
+            </div>
+
+            {/* Comparison Panels - using same Container component */}
+            {comparisonPanels.map((panel, index) => {
+              const panelAlgorithm =
+                panel.library === 'chunkdown'
+                  ? panel.chunkdownAlgorithm
+                  : panel.library === 'mastra'
+                    ? panel.mastraAlgorithm
+                    : panel.langchainAlgorithm;
+
+              return (
+                <div
+                  key={panel.id}
+                  className={
+                    layoutMode === 'column' && !panel.collapsed
+                      ? 'flex-1 min-w-[400px] min-h-0 overflow-hidden'
+                      : layoutMode === 'row' && !panel.collapsed
+                        ? 'flex-1 min-h-[400px] overflow-hidden'
+                        : ''
+                  }
+                  style={{ order: getSectionOrder(panel.id) }}
                 >
-                  <ChunkVisualizerWithOptions
-                    text={text}
-                    splitterId={panel.library}
-                    algorithm={panelAlgorithm}
-                    config={{
-                      chunkSize: panel.chunkSize,
-                      chunkOverlap: 0,
-                      maxOverflowRatio: panel.maxOverflowRatio,
-                    }}
-                    onLibraryChange={(lib) => updateComparisonPanel(panel.id, { library: lib as Library })}
-                    onAlgorithmChange={(alg) => {
-                      if (panel.library === 'chunkdown') {
-                        updateComparisonPanel(panel.id, { chunkdownAlgorithm: alg as ChunkdownAlgorithm });
-                      } else if (panel.library === 'mastra') {
-                        updateComparisonPanel(panel.id, { mastraAlgorithm: alg as MastraAlgorithm });
-                      } else {
-                        updateComparisonPanel(panel.id, { langchainAlgorithm: alg as LangchainAlgorithm });
+                  <Container
+                    label={`Chunks #${index + 2}`}
+                    layoutMode={layoutMode}
+                    collapsed={panel.collapsed || false}
+                    onToggleCollapse={() =>
+                      updateComparisonPanel(panel.id, {
+                        collapsed: !panel.collapsed,
+                      })
+                    }
+                    onMoveLeft={() =>
+                      moveSection(panel.id as SectionId, 'left')
+                    }
+                    onMoveRight={() =>
+                      moveSection(panel.id as SectionId, 'right')
+                    }
+                    canMoveLeft={canMove(panel.id as SectionId, 'left')}
+                    canMoveRight={canMove(panel.id as SectionId, 'right')}
+                    showCloseButton={true}
+                    onClose={() => removeComparisonPanel(panel.id)}
+                  >
+                    <ChunkVisualizerWithOptions
+                      text={text}
+                      splitterId={panel.library}
+                      algorithm={panelAlgorithm}
+                      config={{
+                        chunkSize: panel.chunkSize,
+                        chunkOverlap: 0,
+                        maxOverflowRatio: panel.maxOverflowRatio,
+                      }}
+                      onLibraryChange={(lib) =>
+                        updateComparisonPanel(panel.id, {
+                          library: lib as Library,
+                        })
                       }
-                    }}
-                    onConfigChange={(updates) => {
-                      updateComparisonPanel(panel.id, updates);
-                    }}
-                    availableAlgorithms={splitterRegistry.get(panel.library)?.algorithms || []}
-                    onTooltipMouseEnter={handleTooltipMouseEnter}
-                    onTooltipMouseLeave={handleTooltipMouseLeave}
-                  />
-                </Container>
-              </div>
-            );
-          })}
+                      onAlgorithmChange={(alg) => {
+                        if (panel.library === 'chunkdown') {
+                          updateComparisonPanel(panel.id, {
+                            chunkdownAlgorithm: alg as ChunkdownAlgorithm,
+                          });
+                        } else if (panel.library === 'mastra') {
+                          updateComparisonPanel(panel.id, {
+                            mastraAlgorithm: alg as MastraAlgorithm,
+                          });
+                        } else {
+                          updateComparisonPanel(panel.id, {
+                            langchainAlgorithm: alg as LangchainAlgorithm,
+                          });
+                        }
+                      }}
+                      onConfigChange={(updates) => {
+                        updateComparisonPanel(panel.id, updates);
+                      }}
+                      availableAlgorithms={
+                        splitterRegistry.get(panel.library)?.algorithms || []
+                      }
+                      onTooltipMouseEnter={handleTooltipMouseEnter}
+                      onTooltipMouseLeave={handleTooltipMouseLeave}
+                    />
+                  </Container>
+                </div>
+              );
+            })}
           </div>
         </div>
 

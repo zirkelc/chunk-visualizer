@@ -47,7 +47,10 @@ export function SplitterConfig({
                   step={option.step}
                   value={config[option.key] ?? option.defaultValue}
                   onChange={(e) =>
-                    onChange({ ...config, [option.key]: Number(e.target.value) })
+                    onChange({
+                      ...config,
+                      [option.key]: Number(e.target.value),
+                    })
                   }
                   className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
@@ -58,7 +61,10 @@ export function SplitterConfig({
                   step={option.step}
                   value={config[option.key] ?? option.defaultValue}
                   onChange={(e) =>
-                    onChange({ ...config, [option.key]: Number(e.target.value) })
+                    onChange({
+                      ...config,
+                      [option.key]: Number(e.target.value),
+                    })
                   }
                   className="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-black dark:text-white bg-white dark:bg-gray-700"
                 />
@@ -135,7 +141,9 @@ export function SplitterConfig({
               <select
                 id={option.key}
                 value={config[option.key] ?? option.defaultValue}
-                onChange={(e) => onChange({ ...config, [option.key]: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...config, [option.key]: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-black dark:text-white bg-white dark:bg-gray-700"
               >
                 {option.options.map((opt) => (

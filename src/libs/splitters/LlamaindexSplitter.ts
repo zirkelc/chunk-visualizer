@@ -1,7 +1,7 @@
-import { SentenceSplitter, MarkdownNodeParser, Document } from 'llamaindex';
+import { Document, MarkdownNodeParser, SentenceSplitter } from 'llamaindex';
 import packageJson from '../../../package.json';
-import type { TextSplitter, TextSplitterConfig, ConfigOption } from './types';
 import { chunkOverlapOptions, chunkSizeOptions } from './options';
+import type { ConfigOption, TextSplitter, TextSplitterConfig } from './types';
 
 /**
  * LlamaIndex text splitter implementation
@@ -14,7 +14,11 @@ export class LlamaIndexSplitter implements TextSplitter {
   readonly algorithms = ['sentence', 'markdown'] as const;
 
   async splitText(text: string, config: TextSplitterConfig): Promise<string[]> {
-    const { chunkSize = 200, chunkOverlap = 0, algorithm = 'markdown' } = config;
+    const {
+      chunkSize = 200,
+      chunkOverlap = 0,
+      algorithm = 'markdown',
+    } = config;
 
     switch (algorithm) {
       case 'sentence': {
@@ -47,10 +51,7 @@ export class LlamaIndexSplitter implements TextSplitter {
         return [];
       case 'sentence':
         // Sentence splitter supports chunkSize and chunkOverlap
-        return [
-          chunkSizeOptions,
-          chunkOverlapOptions,
-        ];
+        return [chunkSizeOptions, chunkOverlapOptions];
       default:
         return [];
     }

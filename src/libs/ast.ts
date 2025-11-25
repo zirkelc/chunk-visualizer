@@ -85,7 +85,7 @@ export const createHierarchicalAST = (root: Root): HierarchicalRoot => {
         if (node.position) {
           const lastChild = section.children[section.children.length - 1];
           const endPos = lastChild?.position?.end || node.position.end;
-          
+
           section.position = {
             start: node.position.start,
             end: endPos,

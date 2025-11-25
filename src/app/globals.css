@@ -6,7 +6,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-jetbrains-mono);
   --font-mono: var(--font-jetbrains-mono);
-  
+
   /* Custom gray-850 for parent boxes */
   --color-gray-850: rgb(24 24 27);
 }

@@ -11,8 +11,7 @@ import type { TextSplitter } from './types';
 class SplitterRegistry {
   private splitters: Map<string, TextSplitter> = new Map();
 
-  constructor() {
-  }
+  constructor() {}
 
   /**
    * Register a new text splitter

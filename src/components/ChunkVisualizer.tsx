@@ -2,8 +2,8 @@
 
 import type { MouseEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { fromMarkdown, getContentSize } from '../libs/markdown';
 import { useTextSplitter } from '../hooks/useTextSplitter';
+import { fromMarkdown, getContentSize } from '../libs/markdown';
 import type { TextSplitterConfig } from '../libs/splitters/types';
 import Toast from './Toast';
 
@@ -115,8 +115,6 @@ function ChunkVisualizer({
     };
   }, []);
 
-
-
   // Handle copy chunks to clipboard
   const handleCopyChunks = async () => {
     try {
@@ -211,8 +209,8 @@ function ChunkVisualizer({
             }}
           >
             <div className="whitespace-nowrap">
-              {selection.text.length} chars ({getContentSize(fromMarkdown(selection.text))}{' '}
-              content)
+              {selection.text.length} chars (
+              {getContentSize(fromMarkdown(selection.text))} content)
             </div>
             <div
               className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full"

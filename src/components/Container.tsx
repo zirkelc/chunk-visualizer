@@ -70,9 +70,13 @@ export function Container({
         >
           <span
             className={`text-sm font-medium text-gray-600 dark:text-gray-400 ${
-              layoutMode === 'column' ? 'writing-mode-vertical transform -rotate-180' : ''
+              layoutMode === 'column'
+                ? 'writing-mode-vertical transform -rotate-180'
+                : ''
             }`}
-            style={layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}}
+            style={
+              layoutMode === 'column' ? { writingMode: 'vertical-rl' } : {}
+            }
           >
             {label}
           </span>
@@ -114,11 +118,26 @@ export function Container({
                 disabled={!canMoveLeft}
                 className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {layoutMode === 'column' ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 15l7-7 7 7"
+                    />
                   )}
                 </svg>
               </button>
@@ -129,11 +148,26 @@ export function Container({
                 disabled={!canMoveRight}
                 className="p-0.5 text-gray-500 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {layoutMode === 'column' ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   )}
                 </svg>
               </button>
@@ -146,8 +180,18 @@ export function Container({
                   title="Remove this panel"
                   className="p-1 text-gray-600 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -159,11 +203,26 @@ export function Container({
                 title={collapsed ? 'Expand' : 'Collapse'}
                 className="p-1 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   {collapsed ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
                   ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 12H4"
+                    />
                   )}
                 </svg>
               </button>
@@ -179,9 +238,7 @@ export function Container({
 
           {/* Main content */}
           <div className="flex-1 min-h-0 overflow-hidden">
-            <div className="h-full overflow-auto">
-              {children}
-            </div>
+            <div className="h-full overflow-auto">{children}</div>
           </div>
         </div>
       )}
