@@ -24,8 +24,8 @@ importers:
         specifier: ^5.0.86
         version: 5.0.86(zod@4.1.12)
       chunkdown:
-        specifier: ^2.4.0
-        version: 2.4.0
+        specifier: ^2.4.1
+        version: 2.4.1
       llamaindex:
         specifier: ^0.12.0
         version: 0.12.0(hono@4.10.4)(next@15.4.5(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(tree-sitter@0.22.4)(web-tree-sitter@0.24.7)(zod@4.1.12)
@@ -1464,8 +1464,8 @@ packages:
   character-entities@2.0.2:
     resolution: {integrity: sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ==}
 
-  chunkdown@2.4.0:
-    resolution: {integrity: sha512-qu+Q4cdI7TGhNXPPwwB7sBMRIAh50NA6U/rRbxX1oapgZ8cJOSPTVXjx5fsZ6gAd5VeDt+d388hH6OBMXG9AlQ==}
+  chunkdown@2.4.1:
+    resolution: {integrity: sha512-Iq4Ic7xAs6HeDWqRizzVqMBM+jS79SSvhruknG+R9xIc8qES+v7W2qZ6bcEU4uafgcRsafafWzOiRd0ILTEvfw==}
 
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
@@ -4307,7 +4307,7 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chunkdown@2.4.0:
+  chunkdown@2.4.1:
     dependencies:
       mdast-util-from-markdown: 2.0.2
       mdast-util-gfm: 3.1.0
