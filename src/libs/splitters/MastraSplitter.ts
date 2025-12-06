@@ -13,21 +13,22 @@ export class MastraSplitter implements TextSplitter {
   readonly disabled = true; // Currently disabled due to browser compatibility issues
 
   async splitText(text: string, config: TextSplitterConfig): Promise<string[]> {
-    const { MDocument } = await import('@mastra/rag');
-    const {
-      chunkSize = 200,
-      chunkOverlap = 0,
-      algorithm = 'recursive',
-    } = config;
+    // const { MDocument } = await import('@mastra/rag');
+    // const {
+    //   chunkSize = 200,
+    //   chunkOverlap = 0,
+    //   algorithm = 'recursive',
+    // } = config;
 
-    const doc = MDocument.fromText(text);
-    const chunkedDoc = await doc.chunk({
-      strategy: algorithm as 'recursive' | 'character' | 'markdown',
-      maxSize: chunkSize,
-      overlap: chunkOverlap,
-    });
+    // const doc = MDocument.fromText(text);
+    // const chunkedDoc = await doc.chunk({
+    //   strategy: algorithm as 'recursive' | 'character' | 'markdown',
+    //   maxSize: chunkSize,
+    //   overlap: chunkOverlap,
+    // });
 
-    return chunkedDoc.map((chunk: any) => chunk.text);
+    // return chunkedDoc.map((chunk: any) => chunk.text);
+    return [];
   }
 
   getAlgorithmConfig(): ConfigOption[] {
