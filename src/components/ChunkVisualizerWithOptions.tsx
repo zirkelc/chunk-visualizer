@@ -52,6 +52,7 @@ export function ChunkVisualizerWithOptions({
   const [viewMode, setViewMode] = useState<'options' | 'stats' | 'none'>(
     'options',
   );
+  const [showTokens, setShowTokens] = useState(false);
   const splitter = splitterRegistry.get(splitterId);
   const libraryName = splitter?.name || splitterId;
 
@@ -427,6 +428,31 @@ export function ChunkVisualizerWithOptions({
           </>
         )}
 
+        {/* Show Tokens Checkbox - separate from splitter config */}
+        {viewMode === 'options' && (
+          <>
+            <div className="px-4 py-2 bg-white dark:bg-gray-800">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showTokens}
+                  onChange={(e) => setShowTokens(e.target.checked)}
+                  className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-black dark:text-white font-medium">
+                  Show Tokens
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  (visualize token boundaries)
+                </span>
+              </label>
+            </div>
+
+            {/* Horizontal Rule Separator */}
+            <hr className="border-gray-300 dark:border-gray-600" />
+          </>
+        )}
+
         {/* Stats Section */}
         {viewMode === 'stats' && (
           <>
@@ -582,6 +608,7 @@ export function ChunkVisualizerWithOptions({
             splitterId={splitterId}
             algorithm={algorithm}
             config={config}
+            showTokens={showTokens}
           />
         </div>
       </div>

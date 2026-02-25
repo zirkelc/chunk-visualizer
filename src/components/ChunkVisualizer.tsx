@@ -12,6 +12,7 @@ interface ChunkVisualizerProps {
   splitterId: string;
   algorithm: string;
   config: TextSplitterConfig;
+  showTokens?: boolean;
 }
 
 function ChunkVisualizer({
@@ -19,6 +20,7 @@ function ChunkVisualizer({
   splitterId,
   algorithm,
   config,
+  showTokens = false,
 }: ChunkVisualizerProps) {
   // Use the new hook for text splitting
   const { chunks } = useTextSplitter({
@@ -41,6 +43,10 @@ function ChunkVisualizer({
     y: number;
   } | null>(null);
   const visualizationRef = useRef<HTMLDivElement>(null);
+
+  // Tokenized chunks state
+  const [tokenizedChunks, setTokenizedChunks] = useState<string[][]>([]);
+  const [isTokenizing, setIsTokenizing] = useState(false);
 
   // Generate colors for chunks
   const generateColors = (count: number): string[] => {
@@ -65,6 +71,52 @@ function ChunkVisualizer({
   };
 
   const colors = generateColors(chunks.length);
+
+  // Tokenize chunks when showTokens is enabled
+  useEffect(() => {
+    if (!showTokens || chunks.length === 0) {
+      setTokenizedChunks([]);
+      setIsTokenizing(false);
+      return;
+    }
+
+    const tokenizeAllChunks = async () => {
+      setIsTokenizing(true);
+      const results: string[][] = [];
+      for (const chunk of chunks) {
+        const tokens = await tokenizeChunk(chunk);
+        results.push(tokens);
+      }
+      setTokenizedChunks(results);
+      setIsTokenizing(false);
+    };
+
+    tokenizeAllChunks();
+  }, [showTokens, chunks]);
+
+  // Tokenize a chunk of text using tiktoken
+  const tokenizeChunk = async (chunk: string): Promise<string[]> => {
+    try {
+      // Dynamically import tiktoken to avoid loading WASM module on initial render
+      const { get_encoding } = await import('tiktoken');
+      const encoding = get_encoding('cl100k_base'); // GPT-4 encoding
+      const tokenIds = encoding.encode(chunk);
+      const tokenStrings: string[] = [];
+
+      for (let i = 0; i < tokenIds.length; i++) {
+        const decodedBytes = encoding.decode(new Uint32Array([tokenIds[i]]));
+        const decoded = new TextDecoder().decode(decodedBytes);
+        tokenStrings.push(decoded);
+      }
+
+      encoding.free();
+      return tokenStrings;
+    } catch (error) {
+      console.error('Error tokenizing chunk:', error);
+      // Fallback: return the chunk as a single token
+      return [chunk];
+    }
+  };
 
   // Handle text selection
   const handleMouseUp = () => {
@@ -179,18 +231,62 @@ function ChunkVisualizer({
         )}
         {chunks.length > 0 ? (
           <div className="leading-relaxed text-sm font-mono">
-            {chunks.map((chunk, index) => (
-              <span
-                key={`${index}`}
-                className={`${colors[index]} px-1 py-0.5`}
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {chunk}
-              </span>
-            ))}
+            {isTokenizing && showTokens && (
+              <div className="absolute top-12 right-12 bg-blue-500 text-white text-xs px-2 py-1 rounded shadow-lg">
+                Tokenizing...
+              </div>
+            )}
+            {chunks.map((chunk, index) => {
+              if (showTokens && tokenizedChunks[index]) {
+                // Visualize tokens with borders and alternating shades
+                const tokens = tokenizedChunks[index];
+                return (
+                  <span
+                    key={`${index}`}
+                    className={`${colors[index]}`}
+                    style={{
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {tokens.map((token, tokenIndex) => (
+                      <span
+                        key={`${index}-${tokenIndex}`}
+                        style={{
+                          borderRight:
+                            tokenIndex < tokens.length - 1
+                              ? '1px solid rgba(0, 0, 0, 0.3)'
+                              : 'none',
+                          paddingRight:
+                            tokenIndex < tokens.length - 1 ? '1px' : '0',
+                          whiteSpace: 'pre-wrap',
+                          backgroundColor:
+                            tokenIndex % 2 === 0
+                              ? 'rgba(0, 0, 0,  0.05)'
+                              : 'rgba(255, 255, 255, 0.15)',
+                        }}
+                      >
+                        {token}
+                      </span>
+                    ))}
+                  </span>
+                );
+              }
+
+              // Normal chunk visualization without tokens
+              return (
+                <span
+                  key={`${index}`}
+                  className={`${colors[index]} px-1 py-0.5`}
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {chunk}
+                </span>
+              );
+            })}
           </div>
         ) : (
           <div className="text-gray-400 dark:text-gray-500 text-center py-8">
