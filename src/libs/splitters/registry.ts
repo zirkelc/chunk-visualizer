@@ -1,3 +1,4 @@
+import { ChunkdownNextSplitter } from './ChunkdownNextSplitter';
 import { ChunkdownSplitter } from './ChunkdownSplitter';
 import { LangchainSplitter } from './LangchainSplitter';
 import { LlamaIndexSplitter } from './LlamaindexSplitter';
@@ -63,6 +64,7 @@ class SplitterRegistry {
 export const splitterRegistry = new SplitterRegistry();
 // Register all available splitters
 splitterRegistry.register(new ChunkdownSplitter());
+// splitterRegistry.register(new ChunkdownNextSplitter());
 splitterRegistry.register(new LangchainSplitter());
 splitterRegistry.register(new LlamaIndexSplitter());
 splitterRegistry.register(new MastraSplitter());
