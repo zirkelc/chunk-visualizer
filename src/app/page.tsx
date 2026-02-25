@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import ChunkVisualizer from '../components/ChunkVisualizer';
 import { ChunkVisualizerWithOptions } from '../components/ChunkVisualizerWithOptions';
 import { Container } from '../components/Container';
@@ -147,6 +147,8 @@ function HomeContent() {
 
   // Load state from URL on mount
   useEffect(() => {
+    if (isInitialized) return; // Guard to prevent re-running after first load
+
     const params = new URLSearchParams(searchParams.toString());
 
     // Load text
@@ -276,7 +278,7 @@ function HomeContent() {
     }
 
     setIsInitialized(true);
-  }, [searchParams]);
+  }, [searchParams, isInitialized]);
 
   // Apply theme to document
   useEffect(() => {
@@ -400,112 +402,118 @@ function HomeContent() {
     mastraAlgorithm,
   ]);
 
-  // Update URL when state changes
-  const updateURL = useCallback(() => {
+  // Update URL when state changes (with debouncing)
+  useEffect(() => {
     if (!isInitialized) return;
 
-    const params = new URLSearchParams();
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
 
-    // Always encode the current text
-    if (text) {
-      const encodedText = encodeText(text);
-      // Check if encoded text would make URL too long (rough estimate)
-      const estimatedUrlLength =
-        window.location.origin.length +
-        window.location.pathname.length +
-        encodedText.length;
+      // Always encode the current text
+      if (text) {
+        const encodedText = encodeText(text);
+        // Check if encoded text would make URL too long (rough estimate)
+        const estimatedUrlLength =
+          window.location.origin.length +
+          window.location.pathname.length +
+          encodedText.length;
 
-      // Chrome supports URLs up to ~32,767 characters
-      if (estimatedUrlLength > 32_767) {
+        // Chrome supports URLs up to ~32,767 characters
+        if (estimatedUrlLength > 32_767) {
+          setToast({
+            message:
+              `Text too large to include in URL. Share functionality limited.`,
+            visible: true,
+          });
+          setTimeout(() => {
+            setToast({ message: ``, visible: false });
+          }, 4_000);
+          // Don't include text in URL if it's too long
+        } else {
+          params.set(`text`, encodedText);
+        }
+      }
+
+      // Store library and algorithm
+      if (library !== `chunkdown`) {
+        params.set(`library`, library);
+      }
+
+      if (library === `chunkdown` && chunkdownAlgorithm !== `markdown`) {
+        params.set(`chunkdownAlgorithm`, chunkdownAlgorithm);
+      }
+
+      if (library === `langchain` && langchainAlgorithm !== `markdown`) {
+        params.set(`langchainAlgorithm`, langchainAlgorithm);
+      }
+
+      if (library === `mastra` && mastraAlgorithm !== `recursive`) {
+        params.set(`mastraAlgorithm`, mastraAlgorithm);
+      }
+
+      if (chunkSize !== 200) {
+        params.set(`chunkSize`, chunkSize.toString());
+      }
+
+      if (astCollapsed) {
+        params.set(`astCollapsed`, `true`);
+      }
+
+      // Store section collapse states
+      if (inputCollapsed) params.set(`inputCollapsed`, `true`);
+      if (chunksCollapsed) params.set(`chunksCollapsed`, `true`);
+
+      // Store toggleable section visibility states
+      if (statsVisible) params.set(`statsVisible`, `true`);
+      if (!libraryOptionsVisible) params.set(`libraryOptionsVisible`, `false`); // Only store if false (default is true)
+
+      // Store section order if different from default
+      const defaultOrder = `input,chunks`;
+      const currentOrder = sectionOrder.join(`,`);
+      if (currentOrder !== defaultOrder) {
+        params.set(`sectionOrder`, currentOrder);
+      }
+
+      if (maxOverflowRatio !== 1.5) {
+        params.set(`maxOverflow`, maxOverflowRatio.toString());
+      }
+
+      if (layoutMode !== `column`) {
+        params.set(`layout`, layoutMode);
+      }
+
+      // Don't save theme to URL if it's the default (light)
+      if (theme !== `light`) {
+        params.set(`theme`, theme);
+      }
+
+      // Store comparison panels
+      if (comparisonPanels.length > 0) {
+        params.set(
+          `comparison`,
+          encodeURIComponent(JSON.stringify(comparisonPanels)),
+        );
+      }
+
+      const newUrl = params.toString() ? `?${params.toString()}` : `/`;
+
+      try {
+        router.replace(newUrl, { scroll: false });
+      } catch (error) {
+        console.error(`Failed to update URL:`, error);
         setToast({
-          message:
-            'Text too large to include in URL. Share functionality limited.',
+          message: `URL too long error. Text sharing disabled.`,
           visible: true,
         });
         setTimeout(() => {
-          setToast({ message: '', visible: false });
-        }, 4000);
-        // Don't include text in URL if it's too long
-      } else {
-        params.set('text', encodedText);
+          setToast({ message: ``, visible: false });
+        }, 4_000);
       }
-    }
+    }, 500);
 
-    // Store library and algorithm
-    if (library !== 'chunkdown') {
-      params.set('library', library);
-    }
-
-    if (library === 'chunkdown' && chunkdownAlgorithm !== 'markdown') {
-      params.set('chunkdownAlgorithm', chunkdownAlgorithm);
-    }
-
-    if (library === 'langchain' && langchainAlgorithm !== 'markdown') {
-      params.set('langchainAlgorithm', langchainAlgorithm);
-    }
-
-    if (library === 'mastra' && mastraAlgorithm !== 'recursive') {
-      params.set('mastraAlgorithm', mastraAlgorithm);
-    }
-
-    if (chunkSize !== 200) {
-      params.set('chunkSize', chunkSize.toString());
-    }
-
-    if (astCollapsed) {
-      params.set('astCollapsed', 'true');
-    }
-
-    // Store section collapse states
-    if (inputCollapsed) params.set('inputCollapsed', 'true');
-    if (chunksCollapsed) params.set('chunksCollapsed', 'true');
-
-    // Store toggleable section visibility states
-    if (statsVisible) params.set('statsVisible', 'true');
-    if (!libraryOptionsVisible) params.set('libraryOptionsVisible', 'false'); // Only store if false (default is true)
-
-    // Store section order if different from default
-    const defaultOrder = 'input,chunks';
-    const currentOrder = sectionOrder.join(',');
-    if (currentOrder !== defaultOrder) {
-      params.set('sectionOrder', currentOrder);
-    }
-
-    if (maxOverflowRatio !== 1.5) {
-      params.set('maxOverflow', maxOverflowRatio.toString());
-    }
-
-    if (layoutMode !== 'column') {
-      params.set('layout', layoutMode);
-    }
-
-    // Don't save theme to URL if it's the default (light)
-    if (theme !== 'light') {
-      params.set('theme', theme);
-    }
-
-    // Store comparison panels
-    if (comparisonPanels.length > 0) {
-      params.set(
-        'comparison',
-        encodeURIComponent(JSON.stringify(comparisonPanels)),
-      );
-    }
-
-    const newUrl = params.toString() ? `?${params.toString()}` : '/';
-
-    try {
-      router.replace(newUrl, { scroll: false });
-    } catch (error) {
-      console.error('Failed to update URL:', error);
-      setToast({
-        message: 'URL too long error. Text sharing disabled.',
-        visible: true,
-      });
-      setTimeout(() => {
-        setToast({ message: '', visible: false });
-      }, 4000);
-    }
+    return () => {
+      clearTimeout(timer);
+    };
   }, [
     text,
     library,
@@ -527,20 +535,6 @@ function HomeContent() {
     router,
   ]);
 
-  // Update URL when state changes (with debouncing for text)
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    // Always debounce text updates
-    const timer = setTimeout(() => {
-      updateURL();
-    }, 500);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [isInitialized, updateURL]);
-
   // Get current algorithm based on selected library
   const getCurrentAlgorithm = () => {
     if (library === 'chunkdown') return chunkdownAlgorithm;
@@ -555,15 +549,15 @@ function HomeContent() {
   };
 
   // Handle library change
-  const handleLibraryChange = (newLibrary: Library) => {
-    setLibrary(newLibrary);
+  const handleLibraryChange = (newLibrary: string) => {
+    setLibrary(newLibrary as Library);
   };
 
   // Handle algorithm change
   const handleAlgorithmChange = (algorithm: string) => {
-    if (library === 'chunkdown') {
+    if (library === `chunkdown`) {
       setChunkdownAlgorithm(algorithm as ChunkdownAlgorithm);
-    } else if (library === 'mastra') {
+    } else if (library === `mastra`) {
       setMastraAlgorithm(algorithm as MastraAlgorithm);
     } else {
       setLangchainAlgorithm(algorithm as LangchainAlgorithm);
@@ -593,9 +587,10 @@ function HomeContent() {
   };
 
   // Move section left/right
-  const moveSection = (sectionId: SectionId, direction: 'left' | 'right') => {
+  const moveSection = (sectionId: SectionId, direction: `left` | `right`) => {
     const currentIndex = sectionOrder.indexOf(sectionId);
-    const newIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
+    const newIndex =
+      direction === `left` ? currentIndex - 1 : currentIndex + 1;
 
     // Check bounds
     if (newIndex < 0 || newIndex >= sectionOrder.length) return;
@@ -609,9 +604,9 @@ function HomeContent() {
   };
 
   // Check if section can move in a direction
-  const canMove = (sectionId: SectionId, direction: 'left' | 'right') => {
+  const canMove = (sectionId: SectionId, direction: `left` | `right`) => {
     const currentIndex = sectionOrder.indexOf(sectionId);
-    if (direction === 'left') return currentIndex > 0;
+    if (direction === `left`) return currentIndex > 0;
     return currentIndex < sectionOrder.length - 1;
   };
 
@@ -635,6 +630,22 @@ function HomeContent() {
 
   const handleTooltipMouseLeave = () => {
     setTooltip(null);
+  };
+
+  // Config for main ChunkVisualizerWithOptions
+  const mainConfig = {
+    chunkSize,
+    chunkOverlap: 0,
+    maxOverflowRatio,
+  };
+
+  // Config change handler for main panel
+  const handleConfigChange = (
+    updates: Partial<{ chunkSize: number; maxOverflowRatio: number }>,
+  ) => {
+    if (updates.chunkSize !== undefined) setChunkSize(updates.chunkSize);
+    if (updates.maxOverflowRatio !== undefined)
+      setMaxOverflowRatio(updates.maxOverflowRatio);
   };
 
   // Comparison panel management
@@ -1214,19 +1225,10 @@ function HomeContent() {
                   text={text}
                   splitterId={library}
                   algorithm={getCurrentAlgorithm()}
-                  config={{
-                    chunkSize,
-                    chunkOverlap: 0,
-                    maxOverflowRatio,
-                  }}
-                  onLibraryChange={(lib) => handleLibraryChange(lib as Library)}
+                  config={mainConfig}
+                  onLibraryChange={handleLibraryChange}
                   onAlgorithmChange={handleAlgorithmChange}
-                  onConfigChange={(updates) => {
-                    if (updates.chunkSize !== undefined)
-                      setChunkSize(updates.chunkSize);
-                    if (updates.maxOverflowRatio !== undefined)
-                      setMaxOverflowRatio(updates.maxOverflowRatio);
-                  }}
+                  onConfigChange={handleConfigChange}
                   availableAlgorithms={getAvailableAlgorithms()}
                   onTooltipMouseEnter={handleTooltipMouseEnter}
                   onTooltipMouseLeave={handleTooltipMouseLeave}
