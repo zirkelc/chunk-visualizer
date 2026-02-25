@@ -1,4 +1,3 @@
-import { ChunkdownNextSplitter } from './ChunkdownNextSplitter';
 import { ChunkdownSplitter } from './ChunkdownSplitter';
 import { LangchainSplitter } from './LangchainSplitter';
 import { LlamaIndexSplitter } from './LlamaindexSplitter';
