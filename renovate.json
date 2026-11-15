@@ -1,0 +1,28 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "semanticCommits": "enabled",
+  "minimumReleaseAge": "1 day",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "The visualizer shows the latest chunkdown release. A new release merges as soon as the Vercel preview build passes, so the deployment follows each release. A major release opens a pull request for review, because it can change the API.",
+      "matchPackageNames": ["chunkdown"],
+      "minimumReleaseAge": null,
+      "prPriority": 10
+    },
+    {
+      "matchPackageNames": ["chunkdown"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "The other minor and patch updates go into one weekly pull request, which merges when the Vercel preview build passes.",
+      "matchPackageNames": ["!chunkdown"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "non-major dependencies",
+      "schedule": ["before 6am on monday"],
+      "automerge": true
+    }
+  ]
+}
