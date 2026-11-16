@@ -13,7 +13,7 @@
     "@langchain/textsplitters": "^1.0.2",
     "@mastra/core": "^1.83.0",
     "@mastra/rag": "^2.8.0",
-    "@vercel/analytics": "^1.6.1",
+    "@vercel/analytics": "^2.0.1",
     "ai": "^5.0.290",
     "chunkdown": "^3.6.2",
     "llamaindex": "^0.12.1",
