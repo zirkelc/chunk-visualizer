@@ -1,0 +1,6 @@
+packages:
+  - '.'
+
+# chunkdown releases go live without a delay, so a lockfile can contain a chunkdown version younger than the minimum release age
+minimumReleaseAgeExclude:
+  - chunkdown
