@@ -13,28 +13,25 @@ importers:
         version: 1.0.2(@langchain/core@1.4.1(@opentelemetry/api@1.9.0)(@opentelemetry/exporter-trace-otlp-proto@0.203.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.2.0(@opentelemetry/api@1.9.0))(ws@8.23.0))
       '@mastra/core':
         specifier: ^1.83.0
-        version: 1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)
+        version: 1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)
       '@mastra/rag':
         specifier: ^2.8.0
-        version: 2.8.0(@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7))(zod@4.6.7)
+        version: 2.8.0(@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7))(zod@4.6.7)
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.4.6(@opentelemetry/api@1.9.0)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react@19.3.1)
-      ai:
-        specifier: ^7.0.173
-        version: 7.0.173(zod@4.6.7)
       chunkdown:
         specifier: ^3.6.2
-        version: 3.6.2(supports-color@7.2.0)
+        version: 3.6.2
       llamaindex:
         specifier: ^0.12.1
         version: 0.12.1(hono@4.13.18)(next@16.4.6(@opentelemetry/api@1.9.0)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(tree-sitter@0.22.4)(web-tree-sitter@0.24.7)(zod@4.6.7)
       mdast-util-from-markdown:
         specifier: ^2.1.0
-        version: 2.1.0(supports-color@7.2.0)
+        version: 2.1.0
       mdast-util-gfm:
         specifier: ^3.1.0
-        version: 3.1.0(supports-color@7.2.0)
+        version: 3.1.0
       mdast-util-heading-range:
         specifier: ^4.0.0
         version: 4.0.0
@@ -739,14 +736,12 @@ packages:
   '@opentelemetry/sdk-trace-base@2.0.1':
     resolution: {integrity: sha512-xYLlvk/xdScGx1aEqvxLwf6sXQLXCjk3/1SQT9X9AoN5rXRhkdvIFShuNNmtTEPRBqcsMbS4p/gJLNI2wXaDuQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
-    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-base@2.2.0':
     resolution: {integrity: sha512-xWQgL0Bmctsalg6PaXExmzdedSp3gyKV8mQBwK/j9VGdCDu2fmXIb2gAehBKbkXCpJ4HPkgv3QfoJWRT4dHWbw==}
     engines: {node: ^18.19.0 || >=20.6.0}
-    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
@@ -1529,10 +1524,6 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
-  has-flag@4.0.0:
-    resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
-    engines: {node: '>=8'}
-
   has-symbols@1.1.0:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
     engines: {node: '>= 0.4'}
@@ -2239,10 +2230,6 @@ packages:
       babel-plugin-macros:
         optional: true
 
-  supports-color@7.2.0:
-    resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
-    engines: {node: '>=8'}
-
   tailwindcss@4.3.5:
     resolution: {integrity: sha512-FcQk9BuffmEHJP2G0XmB2SplU1aLTI7j07Kunk+U74Ny+XiWOtzXz9aujFZ/avntw1e2cOv/3PkgzflQ7gX2vQ==}
 
@@ -2413,20 +2400,20 @@ packages:
 
 snapshots:
 
-  '@a2a-js/sdk@0.3.14(@grpc/grpc-js@1.14.2)(express@4.22.1(supports-color@7.2.0))':
+  '@a2a-js/sdk@0.3.14(@grpc/grpc-js@1.14.2)(express@4.22.1)':
     dependencies:
       uuid: 11.1.0
     optionalDependencies:
       '@grpc/grpc-js': 1.14.2
-      express: 4.22.1(supports-color@7.2.0)
+      express: 4.22.1
 
-  '@a2a-js/sdk@1.0.1(@grpc/grpc-js@1.14.2)(express@4.22.1(supports-color@7.2.0))':
+  '@a2a-js/sdk@1.0.1(@grpc/grpc-js@1.14.2)(express@4.22.1)':
     dependencies:
       jose: 6.2.17
       uuid: 11.1.0
     optionalDependencies:
       '@grpc/grpc-js': 1.14.2
-      express: 4.22.1(supports-color@7.2.0)
+      express: 4.22.1
 
   '@ai-sdk/gateway@4.0.146(zod@4.6.7)':
     dependencies:
@@ -2434,6 +2421,7 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.81(zod@4.6.7)
       '@vercel/oidc': 3.2.0
       zod: 4.6.7
+    optional: true
 
   '@ai-sdk/provider-utils@4.0.63(zod@4.6.7)':
     dependencies:
@@ -2459,6 +2447,7 @@ snapshots:
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       zod: 4.6.7
+    optional: true
 
   '@ai-sdk/provider@2.0.5':
     dependencies:
@@ -2475,6 +2464,7 @@ snapshots:
   '@ai-sdk/provider@4.0.38':
     dependencies:
       json-schema: 0.4.0
+    optional: true
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -2919,10 +2909,10 @@ snapshots:
     dependencies:
       '@lukeed/csprng': 1.1.0
 
-  '@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)':
+  '@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)':
     dependencies:
-      '@a2a-js/sdk-v0_3': '@a2a-js/sdk@0.3.14(@grpc/grpc-js@1.14.2)(express@4.22.1(supports-color@7.2.0))'
-      '@a2a-js/sdk-v1': '@a2a-js/sdk@1.0.1(@grpc/grpc-js@1.14.2)(express@4.22.1(supports-color@7.2.0))'
+      '@a2a-js/sdk-v0_3': '@a2a-js/sdk@0.3.14(@grpc/grpc-js@1.14.2)(express@4.22.1)'
+      '@a2a-js/sdk-v1': '@a2a-js/sdk@1.0.1(@grpc/grpc-js@1.14.2)(express@4.22.1)'
       '@ai-sdk/provider-utils-v6': '@ai-sdk/provider-utils@4.0.63(zod@4.6.7)'
       '@ai-sdk/provider-utils-v7': '@ai-sdk/provider-utils@5.0.72(zod@4.6.7)'
       '@ai-sdk/provider-v5': '@ai-sdk/provider@2.0.5'
@@ -2932,7 +2922,7 @@ snapshots:
       '@lukeed/uuid': 2.0.1
       '@mastra/schema-compat': 1.4.0(zod@4.6.7)
       '@standard-schema/spec': 1.1.0
-      chat: 4.45.0(ai@7.0.173(zod@4.6.7))(supports-color@7.2.0)(zod@4.6.7)
+      chat: 4.45.0(ai@7.0.173(zod@4.6.7))(zod@4.6.7)
       croner: 10.0.1
       dotenv: 17.4.2
       execa: 9.6.1
@@ -2973,10 +2963,10 @@ snapshots:
       - zod-openapi
       - zod-to-json-schema
 
-  '@mastra/rag@2.8.0(@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7))(zod@4.6.7)':
+  '@mastra/rag@2.8.0(@mastra/core@1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7))(zod@4.6.7)':
     dependencies:
       '@aws-sdk/client-bedrock-agent-runtime': 3.1169.0
-      '@mastra/core': 1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)
+      '@mastra/core': 1.83.0(@grpc/grpc-js@1.14.2)(@opentelemetry/api@1.9.0)(ai@7.0.173(zod@4.6.7))(express@4.22.1)(zod-to-json-schema@3.25.0(zod@4.6.7))(zod@4.6.7)
       big.js: 7.0.1
       js-tiktoken: 1.0.21
       node-html-better-parser: 1.5.9
@@ -3411,7 +3401,8 @@ snapshots:
       next: 16.4.6(@opentelemetry/api@1.9.0)(@types/node@26.6.6)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react: 19.3.1
 
-  '@vercel/oidc@3.2.0': {}
+  '@vercel/oidc@3.2.0':
+    optional: true
 
   '@workflow/serde@4.1.0': {}
 
@@ -3437,6 +3428,7 @@ snapshots:
       '@ai-sdk/provider': 4.0.38
       '@ai-sdk/provider-utils': 5.0.81(zod@4.6.7)
       zod: 4.6.7
+    optional: true
 
   ansi-regex@5.0.1:
     optional: true
@@ -3459,11 +3451,11 @@ snapshots:
 
   big.js@7.0.1: {}
 
-  body-parser@1.20.4(supports-color@7.2.0):
+  body-parser@1.20.4:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       depd: 2.0.0
       destroy: 1.2.0
       http-errors: 2.0.1
@@ -3499,13 +3491,13 @@ snapshots:
 
   character-entities@2.0.2: {}
 
-  chat@4.45.0(ai@7.0.173(zod@4.6.7))(supports-color@7.2.0)(zod@4.6.7):
+  chat@4.45.0(ai@7.0.173(zod@4.6.7))(zod@4.6.7):
     dependencies:
       '@chat-adapter/catalog': 4.45.0
       '@workflow/serde': 4.1.0-beta.2
       mdast-util-to-string: 4.0.0
-      remark-gfm: 4.0.1(supports-color@7.2.0)
-      remark-parse: 11.0.0(supports-color@7.2.0)
+      remark-gfm: 4.0.1
+      remark-parse: 11.0.0
       remark-stringify: 11.0.0
       remend: 1.4.0
       unified: 11.0.5
@@ -3515,10 +3507,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  chunkdown@3.6.2(supports-color@7.2.0):
+  chunkdown@3.6.2:
     dependencies:
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
-      mdast-util-gfm: 3.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-gfm: 3.1.0
       mdast-util-heading-range: 4.0.0
       mdast-util-to-markdown: 2.2.3
       mdast-util-to-string: 4.0.0
@@ -3572,18 +3564,14 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  debug@2.6.9(supports-color@7.2.0):
+  debug@2.6.9:
     dependencies:
       ms: 2.0.0
-    optionalDependencies:
-      supports-color: 7.2.0
     optional: true
 
-  debug@4.4.3(supports-color@7.2.0):
+  debug@4.4.3:
     dependencies:
       ms: 2.1.3
-    optionalDependencies:
-      supports-color: 7.2.0
 
   decode-named-character-reference@1.2.0:
     dependencies:
@@ -3699,21 +3687,21 @@ snapshots:
       strip-final-newline: 4.0.0
       yoctocolors: 2.2.0
 
-  express@4.22.1(supports-color@7.2.0):
+  express@4.22.1:
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.4(supports-color@7.2.0)
+      body-parser: 1.20.4
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookie: 0.7.2
       cookie-signature: 1.0.7
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       depd: 2.0.0
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
-      finalhandler: 1.3.2(supports-color@7.2.0)
+      finalhandler: 1.3.2
       fresh: 0.5.2
       http-errors: 2.0.1
       merge-descriptors: 1.0.3
@@ -3725,8 +3713,8 @@ snapshots:
       qs: 6.14.0
       range-parser: 1.2.1
       safe-buffer: 5.2.1
-      send: 0.19.1(supports-color@7.2.0)
-      serve-static: 1.16.2(supports-color@7.2.0)
+      send: 0.19.1
+      serve-static: 1.16.2
       setprototypeof: 1.2.0
       statuses: 2.0.2
       type-is: 1.6.18
@@ -3746,9 +3734,9 @@ snapshots:
     dependencies:
       is-unicode-supported: 2.1.0
 
-  finalhandler@1.3.2(supports-color@7.2.0):
+  finalhandler@1.3.2:
     dependencies:
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -3811,9 +3799,6 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
-
-  has-flag@4.0.0:
-    optional: true
 
   has-symbols@1.1.0: {}
 
@@ -4039,14 +4024,14 @@ snapshots:
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
 
-  mdast-util-from-markdown@2.1.0(supports-color@7.2.0):
+  mdast-util-from-markdown@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
       decode-named-character-reference: 1.2.0
       devlop: 1.1.0
       mdast-util-to-string: 4.0.0
-      micromark: 4.0.2(supports-color@7.2.0)
+      micromark: 4.0.2
       micromark-util-decode-numeric-character-reference: 2.0.2
       micromark-util-decode-string: 2.0.1
       micromark-util-normalize-identifier: 2.0.1
@@ -4064,51 +4049,51 @@ snapshots:
       mdast-util-find-and-replace: 3.0.2
       micromark-util-character: 2.1.1
 
-  mdast-util-gfm-footnote@2.1.0(supports-color@7.2.0):
+  mdast-util-gfm-footnote@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.3
       micromark-util-normalize-identifier: 2.0.1
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-strikethrough@2.0.0(supports-color@7.2.0):
+  mdast-util-gfm-strikethrough@2.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-table@2.0.0(supports-color@7.2.0):
+  mdast-util-gfm-table@2.0.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       markdown-table: 3.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm-task-list-item@2.0.0(supports-color@7.2.0):
+  mdast-util-gfm-task-list-item@2.0.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
 
-  mdast-util-gfm@3.1.0(supports-color@7.2.0):
+  mdast-util-gfm@3.1.0:
     dependencies:
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       mdast-util-gfm-autolink-literal: 2.0.1
-      mdast-util-gfm-footnote: 2.1.0(supports-color@7.2.0)
-      mdast-util-gfm-strikethrough: 2.0.0(supports-color@7.2.0)
-      mdast-util-gfm-table: 2.0.0(supports-color@7.2.0)
-      mdast-util-gfm-task-list-item: 2.0.0(supports-color@7.2.0)
+      mdast-util-gfm-footnote: 2.1.0
+      mdast-util-gfm-strikethrough: 2.0.0
+      mdast-util-gfm-table: 2.0.0
+      mdast-util-gfm-task-list-item: 2.0.0
       mdast-util-to-markdown: 2.2.3
     transitivePeerDependencies:
       - supports-color
@@ -4321,10 +4306,10 @@ snapshots:
 
   micromark-util-types@2.0.2: {}
 
-  micromark@4.0.2(supports-color@7.2.0):
+  micromark@4.0.2:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.4.3(supports-color@7.2.0)
+      debug: 4.4.3
       decode-named-character-reference: 1.2.0
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.3
@@ -4532,21 +4517,21 @@ snapshots:
 
   react@19.3.1: {}
 
-  remark-gfm@4.0.1(supports-color@7.2.0):
+  remark-gfm@4.0.1:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-gfm: 3.1.0(supports-color@7.2.0)
+      mdast-util-gfm: 3.1.0
       micromark-extension-gfm: 3.0.0
-      remark-parse: 11.0.0(supports-color@7.2.0)
+      remark-parse: 11.0.0
       remark-stringify: 11.0.0
       unified: 11.0.5
     transitivePeerDependencies:
       - supports-color
 
-  remark-parse@11.0.0(supports-color@7.2.0):
+  remark-parse@11.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.1.0(supports-color@7.2.0)
+      mdast-util-from-markdown: 2.1.0
       micromark-util-types: 2.0.2
       unified: 11.0.5
     transitivePeerDependencies:
@@ -4580,9 +4565,9 @@ snapshots:
   semver@7.8.6:
     optional: true
 
-  send@0.19.0(supports-color@7.2.0):
+  send@0.19.0:
     dependencies:
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 1.0.2
@@ -4599,9 +4584,9 @@ snapshots:
       - supports-color
     optional: true
 
-  send@0.19.1(supports-color@7.2.0):
+  send@0.19.1:
     dependencies:
-      debug: 2.6.9(supports-color@7.2.0)
+      debug: 2.6.9
       depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 2.0.0
@@ -4618,12 +4603,12 @@ snapshots:
       - supports-color
     optional: true
 
-  serve-static@1.16.2(supports-color@7.2.0):
+  serve-static@1.16.2:
     dependencies:
       encodeurl: 2.0.0
       escape-html: 1.0.3
       parseurl: 1.3.3
-      send: 0.19.0(supports-color@7.2.0)
+      send: 0.19.0
     transitivePeerDependencies:
       - supports-color
     optional: true
@@ -4733,11 +4718,6 @@ snapshots:
     dependencies:
       client-only: 0.0.1
       react: 19.3.1
-
-  supports-color@7.2.0:
-    dependencies:
-      has-flag: 4.0.0
-    optional: true
 
   tailwindcss@4.3.5: {}
 

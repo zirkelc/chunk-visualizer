@@ -14,7 +14,6 @@
     "@mastra/core": "^1.83.0",
     "@mastra/rag": "^2.8.0",
     "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.173",
     "chunkdown": "^3.6.2",
     "llamaindex": "^0.12.1",
     "mdast-util-from-markdown": "^2.1.0",
